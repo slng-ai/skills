@@ -41,7 +41,23 @@ Ask the user to paste the key.
 
 ### 3. Validate the key
 
-Make one lightweight authenticated call. `GET /v1/agents` on the agents API is a free DB read — no TTS/STT credits consumed:
+If the CLI is installed (v0.1.9 or later), use the built-in `whoami` command. It hits `GET /v1/agents` under the hood — no TTS/STT credits consumed — and prints a masked key plus the agent count on success:
+
+```bash
+voiceai whoami
+# → Authenticated as zpka_…wxyz · 3 agents
+```
+
+For scripting:
+
+```bash
+voiceai whoami --json
+# → {"ok":true,"status":200,"masked_key":"zpka_…wxyz","agents_count":3}
+```
+
+Exit code is `0` on success, `1` on 401.
+
+If `voiceai` is not on PATH (or you're on an older CLI), fall back to raw curl against the same endpoint:
 
 ```bash
 curl -sS -o /dev/null -w "%{http_code}\n" \
@@ -51,6 +67,8 @@ curl -sS -o /dev/null -w "%{http_code}\n" \
 
 - `200` — key is good.
 - `401` — key is invalid. Ask the user to re-check and paste again. Allow one retry, then stop.
+
+Override the base URL for staging with `VOICEAI_AGENTS_BASE_URL` (CLI) or by editing the curl host.
 
 ### 4. Persist the key
 
@@ -97,7 +115,8 @@ Useful when reconfiguring against a different workspace or before uninstalling �
 | Variable | Purpose | Required |
 |----------|---------|----------|
 | `VOICEAI_API_KEY` | Bearer token sent as `Authorization: Bearer <key>` | Yes |
-| `VOICEAI_BASE_URL` | Override the API base URL (e.g. for staging) | No |
+| `VOICEAI_BASE_URL` | Override the unified TTS/STT base URL (default `https://api.slng.ai`) | No |
+| `VOICEAI_AGENTS_BASE_URL` | Override the agents API base URL (default `https://api.agents.slng.ai`). Used by `voiceai whoami` and the agents skill | No |
 
 ## Security
 
