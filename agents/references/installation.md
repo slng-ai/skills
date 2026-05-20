@@ -35,8 +35,14 @@ agent = client.agents.create(
     name="Hello Agent",
     greeting="Hi, thanks for calling Acme. How can I help you today?",
     system_prompt="[Identity]\n- You are a friendly receptionist for Acme.",
-    voice="aura-2-luna-en",
-    model="claude-haiku-4-5",
+    language="en",
+    region="eu-central",
+    models={
+        "stt": "slng/deepgram/nova:3-en",
+        "llm": "groq/moonshotai/kimi-k2-instruct-0905",
+        "tts": "slng/deepgram/aura:2-en",
+        "tts_voice": "aura-2-thalia-en",
+    },
 )
 print(agent.id)
 ```
@@ -53,8 +59,14 @@ r = requests.post(
         "name": "Hello Agent",
         "greeting": "Hi, thanks for calling Acme. How can I help you today?",
         "system_prompt": "[Identity]\n- You are a friendly receptionist for Acme.",
-        "voice": "aura-2-luna-en",
-        "model": "claude-haiku-4-5",
+        "language": "en",
+        "region": "eu-central",
+        "models": {
+            "stt": "slng/deepgram/nova:3-en",
+            "llm": "groq/moonshotai/kimi-k2-instruct-0905",
+            "tts": "slng/deepgram/aura:2-en",
+            "tts_voice": "aura-2-thalia-en",
+        },
     },
 )
 print(r.json()["id"])
@@ -75,8 +87,14 @@ const agent = await client.agents.create({
   name: "Hello Agent",
   greeting: "Hi, thanks for calling Acme. How can I help you today?",
   systemPrompt: "[Identity]\n- You are a friendly receptionist for Acme.",
-  voice: "aura-2-luna-en",
-  model: "claude-haiku-4-5",
+  language: "en",
+  region: "eu-central",
+  models: {
+    stt: "slng/deepgram/nova:3-en",
+    llm: "groq/moonshotai/kimi-k2-instruct-0905",
+    tts: "slng/deepgram/aura:2-en",
+    tts_voice: "aura-2-thalia-en",
+  },
 });
 console.log(agent.id);
 ```
@@ -94,8 +112,14 @@ const r = await fetch("https://api.agents.slng.ai/v1/agents", {
     name: "Hello Agent",
     greeting: "Hi, thanks for calling Acme. How can I help you today?",
     system_prompt: "[Identity]\n- You are a friendly receptionist for Acme.",
-    voice: "aura-2-luna-en",
-    model: "claude-haiku-4-5",
+    language: "en",
+    region: "eu-central",
+    models: {
+      stt: "slng/deepgram/nova:3-en",
+      llm: "groq/moonshotai/kimi-k2-instruct-0905",
+      tts: "slng/deepgram/aura:2-en",
+      tts_voice: "aura-2-thalia-en",
+    },
   }),
 });
 console.log((await r.json()).id);
@@ -111,8 +135,14 @@ curl https://api.agents.slng.ai/v1/agents \
     "name": "Hello Agent",
     "greeting": "Hi, thanks for calling Acme. How can I help you today?",
     "system_prompt": "[Identity]\n- You are a friendly receptionist for Acme.",
-    "voice": "aura-2-luna-en",
-    "model": "claude-haiku-4-5"
+    "language": "en",
+    "region": "eu-central",
+    "models": {
+      "stt": "slng/deepgram/nova:3-en",
+      "llm": "groq/moonshotai/kimi-k2-instruct-0905",
+      "tts": "slng/deepgram/aura:2-en",
+      "tts_voice": "aura-2-thalia-en"
+    }
   }'
 ```
 

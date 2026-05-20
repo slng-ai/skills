@@ -95,10 +95,12 @@ Response:
 
 ```json
 {
-  "session_id": "sess_...",
+  "call_id": "550e8400-e29b-41d4-a716-446655440000",
   "room_name": "room_...",
   "livekit_url": "wss://livekit.slng.ai",
-  "token": "eyJhbGciOi..."
+  "livekit_token": "eyJhbGciOi...",
+  "max_session_seconds": 1800,
+  "message": "Web session created successfully"
 }
 ```
 
@@ -109,7 +111,7 @@ session = client.agents.web_sessions.create(
     agent_id=agent_id,
     arguments={"customer_name": "Maria"},
 )
-# return session.token + session.room_name to the browser
+# return session.livekit_url + session.livekit_token to the browser
 ```
 
 ### TypeScript (server-side)
@@ -118,7 +120,7 @@ session = client.agents.web_sessions.create(
 const session = await client.agents.webSessions.create(agentId, {
   arguments: { customer_name: "Maria" },
 });
-// Send session.token, session.livekit_url, session.room_name to the browser
+// Send session.livekit_url, session.livekit_token, session.room_name to the browser
 ```
 
 ### Browser (LiveKit JS)
@@ -127,27 +129,34 @@ const session = await client.agents.webSessions.create(agentId, {
 import { Room } from "livekit-client";
 
 const room = new Room();
-await room.connect(session.livekit_url, session.token);
+await room.connect(session.livekit_url, session.livekit_token);
 // LiveKit handles mic capture and audio playback
 ```
 
 **Never expose `VOICEAI_API_KEY` to the browser.** Always mint the session token from your backend.
 
-## Submit tool execution (async webhooks)
+## Submit tool execution
 
-For LLM webhooks where `wait_for_response: false`, the worker fires the webhook and immediately continues. Your webhook server can later return a result via:
+`POST /v1/agents/{agent_id}/calls/{call_id}/tool-executions` appends a tool execution record to a call. This endpoint is primarily used by SLNG-managed agent runtimes to report contextual and system tool activity back to the Agents API — most integrations will not call it directly.
+
+Required body fields: `tool_name`, `tool_kind` (`webhook` | `template` | `human_transfer` | `built_in`), `invocation_source` (`system` | `contextual`), `started_at`, `finished_at`, `duration_ms`, `outcome` (`succeeded` | `failed` | `timed_out` | `skipped` | `cancelled`).
 
 ```bash
-curl https://api.agents.slng.ai/v1/tools/executions \
+curl https://api.agents.slng.ai/v1/agents/$AGENT_ID/calls/$CALL_ID/tool-executions \
   -H "Authorization: Bearer $VOICEAI_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
-    "execution_id": "exec_abc123",
-    "result": {"status": "ok", "appointment_time": "2026-05-20T14:00:00Z"}
+    "tool_name": "book_appointment",
+    "tool_kind": "webhook",
+    "invocation_source": "contextual",
+    "started_at": "2026-05-20T14:00:00Z",
+    "finished_at": "2026-05-20T14:00:02Z",
+    "duration_ms": 1850,
+    "outcome": "succeeded"
   }'
 ```
 
-The `execution_id` comes from the original webhook payload sent to your server. Submitting a late result feeds it back to the LLM as if it had been a synchronous response.
+Returns `204 No Content` on success.
 
 ## Call lifecycle events
 

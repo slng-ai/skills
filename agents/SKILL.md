@@ -27,8 +27,14 @@ AGENT_ID=$(curl -sS https://api.agents.slng.ai/v1/agents \
     "name": "Hello Agent",
     "greeting": "Hi, thanks for calling Acme. How can I help you today?",
     "system_prompt": "[Identity]\n- You are a friendly receptionist for Acme.\n[Style]\n- Warm and concise.",
-    "voice": "aura-2-luna-en",
-    "model": "claude-haiku-4-5"
+    "language": "en",
+    "region": "eu-central",
+    "models": {
+      "stt": "slng/deepgram/nova:3-en",
+      "llm": "groq/moonshotai/kimi-k2-instruct-0905",
+      "tts": "slng/deepgram/aura:2-en",
+      "tts_voice": "aura-2-thalia-en"
+    }
   }' | jq -r .id)
 
 # 2. Dispatch an outbound call
@@ -50,8 +56,14 @@ agent = requests.post(f"{BASE}/agents", headers=H, json={
     "name": "Hello Agent",
     "greeting": "Hi, thanks for calling Acme. How can I help you today?",
     "system_prompt": "[Identity]\n- You are a friendly receptionist for Acme.",
-    "voice": "aura-2-luna-en",
-    "model": "claude-haiku-4-5",
+    "language": "en",
+    "region": "eu-central",
+    "models": {
+        "stt": "slng/deepgram/nova:3-en",
+        "llm": "groq/moonshotai/kimi-k2-instruct-0905",
+        "tts": "slng/deepgram/aura:2-en",
+        "tts_voice": "aura-2-thalia-en",
+    },
 }).json()
 
 requests.post(f"{BASE}/agents/{agent['id']}/calls", headers=H, json={
@@ -75,8 +87,14 @@ const agent = await fetch(`${BASE}/agents`, {
     name: "Hello Agent",
     greeting: "Hi, thanks for calling Acme. How can I help you today?",
     system_prompt: "[Identity]\n- You are a friendly receptionist for Acme.",
-    voice: "aura-2-luna-en",
-    model: "claude-haiku-4-5",
+    language: "en",
+    region: "eu-central",
+    models: {
+      stt: "slng/deepgram/nova:3-en",
+      llm: "groq/moonshotai/kimi-k2-instruct-0905",
+      tts: "slng/deepgram/aura:2-en",
+      tts_voice: "aura-2-thalia-en",
+    },
   }),
 }).then((r) => r.json());
 
@@ -102,30 +120,37 @@ await fetch(`${BASE}/agents/${agent.id}/calls`, {
 | `GET` | `/v1/agents/{id}/calls` | List calls for agent |
 | `GET` | `/v1/agents/{id}/calls/{call_id}` | Get specific call |
 | `POST` | `/v1/agents/{id}/web-sessions` | Create browser voice session |
-| `POST` | `/v1/tools/executions` | Submit async tool execution result |
+| `POST` | `/v1/agents/{id}/calls/{call_id}/tool-executions` | Append a tool execution record to a call (used by SLNG-managed runtimes) |
 
 See [`references/managing-agents.md`](references/managing-agents.md) and [`references/calls-and-sessions.md`](references/calls-and-sessions.md) for full examples in all four paths.
 
 ## Agent config shape
 
-Minimum:
+Minimum (all required):
 
 ```json
 {
   "name": "Hello Agent",
   "greeting": "Hi, thanks for calling Acme. How can I help you today?",
   "system_prompt": "...",
-  "voice": "aura-2-luna-en",
-  "model": "claude-haiku-4-5"
+  "language": "en",
+  "region": "eu-central",
+  "models": {
+    "stt": "slng/deepgram/nova:3-en",
+    "llm": "groq/moonshotai/kimi-k2-instruct-0905",
+    "tts": "slng/deepgram/aura:2-en",
+    "tts_voice": "aura-2-thalia-en"
+  }
 }
 ```
+
+`region` must be one of `us-east`, `eu-central`, `ap-south`. `models` may also include `stt_kwargs`, `llm_kwargs`, `tts_kwargs` objects to pass provider-specific overrides.
 
 Optional fields:
 
 - `tools` — webhook tools the agent can call. See the [`agent-prompt`](../agent-prompt/SKILL.md) skill for the schema and LLM-vs-system webhook guidance.
 - `template_defaults` — fallback values for `{{variable}}` placeholders in `greeting` / `system_prompt`.
-- `stt_model` — override default STT model.
-- `language` — primary language hint.
+- `enable_interruptions` — boolean, defaults to `true`.
 
 ## Dispatching a call
 
@@ -154,13 +179,13 @@ curl https://api.agents.slng.ai/v1/agents/$AGENT_ID/web-sessions \
   -d '{"arguments": {"customer_name": "Maria"}}'
 ```
 
-Response includes a LiveKit `token` and `room_name`. The browser then connects with the standard LiveKit client.
+Response includes `call_id`, `room_name`, `livekit_url`, `livekit_token`, `max_session_seconds`, and `message`. The browser then connects with the standard LiveKit client using `livekit_url` and `livekit_token`.
 
 ## Error handling
 
 | Status | Meaning |
 |--------|---------|
-| `400` | Bad request — usually invalid `system_prompt`, `voice`, or `model` |
+| `400` | Bad request — usually invalid `system_prompt` or `models` config |
 | `401` | Invalid API key |
 | `404` | Agent or call not found |
 | `409` | Conflict (e.g. duplicate name) |
