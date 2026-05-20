@@ -14,8 +14,14 @@ curl https://api.agents.slng.ai/v1/agents \
     "name": "Patient Outreach",
     "greeting": "Hi, is this {{patient_name}}?",
     "system_prompt": "[Identity]\n- You are Sarah, a patient outreach coordinator at {{practice_name}}.\n[Style]\n- Warm and caring.\n[Response Guidelines]\n- Ask one question at a time.\n[Task and Conversation Flow]\n1. Greet the patient by name and ask if they have a moment.\n2. ...\n[Guardrails]\n- Never provide medical advice.",
-    "voice": "aura-2-luna-en",
-    "model": "claude-haiku-4-5",
+    "language": "en",
+    "region": "eu-central",
+    "models": {
+      "stt": "slng/deepgram/nova:3-en",
+      "llm": "groq/moonshotai/kimi-k2-instruct-0905",
+      "tts": "slng/deepgram/aura:2-en",
+      "tts_voice": "aura-2-thalia-en"
+    },
     "template_defaults": {
       "practice_name": "Greenfield Family Medicine"
     },
@@ -55,8 +61,14 @@ agent = client.agents.create(
     name="Patient Outreach",
     greeting="Hi, is this {{patient_name}}?",
     system_prompt="[Identity]\n- You are Sarah, a patient outreach coordinator...",
-    voice="aura-2-luna-en",
-    model="claude-haiku-4-5",
+    language="en",
+    region="eu-central",
+    models={
+        "stt": "slng/deepgram/nova:3-en",
+        "llm": "groq/moonshotai/kimi-k2-instruct-0905",
+        "tts": "slng/deepgram/aura:2-en",
+        "tts_voice": "aura-2-thalia-en",
+    },
     template_defaults={"practice_name": "Greenfield Family Medicine"},
     tools=[...],
 )
@@ -69,8 +81,14 @@ const agent = await client.agents.create({
   name: "Patient Outreach",
   greeting: "Hi, is this {{patient_name}}?",
   systemPrompt: "[Identity]\n- You are Sarah, ...",
-  voice: "aura-2-luna-en",
-  model: "claude-haiku-4-5",
+  language: "en",
+  region: "eu-central",
+  models: {
+    stt: "slng/deepgram/nova:3-en",
+    llm: "groq/moonshotai/kimi-k2-instruct-0905",
+    tts: "slng/deepgram/aura:2-en",
+    tts_voice: "aura-2-thalia-en",
+  },
   templateDefaults: { practice_name: "Greenfield Family Medicine" },
   tools: [...],
 });
@@ -170,9 +188,9 @@ Returns a new agent with a fresh id and a copied configuration.
 | `name` | string | yes | Display name |
 | `greeting` | string | yes | First spoken line. May contain `{{vars}}` |
 | `system_prompt` | string | yes | Use sections like `[Identity]`, `[Style]`, etc. See [`agent-prompt`](../../agent-prompt/SKILL.md) |
-| `voice` | string | yes | TTS voice id, e.g. `aura-2-luna-en` |
-| `model` | string | yes | LLM model id |
-| `stt_model` | string | no | Defaults to a Deepgram Nova variant |
-| `language` | string | no | Primary language hint |
+| `language` | string | yes | ISO code like `"en"` |
+| `region` | string | yes | One of `us-east`, `eu-central`, `ap-south` |
+| `models` | object | yes | Required keys: `stt`, `llm`, `tts`, `tts_voice`. Optional: `stt_kwargs`, `llm_kwargs`, `tts_kwargs` |
 | `tools` | array | no | Webhook tool definitions |
 | `template_defaults` | object | no | Fallback values for `{{vars}}` |
+| `enable_interruptions` | boolean | no | Defaults to `true` |
