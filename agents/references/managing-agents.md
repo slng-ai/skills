@@ -18,7 +18,7 @@ curl https://api.agents.slng.ai/v1/agents \
     "region": "eu-central",
     "models": {
       "stt": "slng/deepgram/nova:3-en",
-      "llm": "groq/moonshotai/kimi-k2-instruct-0905",
+      "llm": "groq/openai/gpt-oss-120b",
       "tts": "slng/deepgram/aura:2-en",
       "tts_voice": "aura-2-thalia-en"
     },
@@ -65,7 +65,7 @@ agent = client.agents.create(
     region="eu-central",
     models={
         "stt": "slng/deepgram/nova:3-en",
-        "llm": "groq/moonshotai/kimi-k2-instruct-0905",
+        "llm": "groq/openai/gpt-oss-120b",
         "tts": "slng/deepgram/aura:2-en",
         "tts_voice": "aura-2-thalia-en",
     },
@@ -85,7 +85,7 @@ const agent = await client.agents.create({
   region: "eu-central",
   models: {
     stt: "slng/deepgram/nova:3-en",
-    llm: "groq/moonshotai/kimi-k2-instruct-0905",
+    llm: "groq/openai/gpt-oss-120b",
     tts: "slng/deepgram/aura:2-en",
     tts_voice: "aura-2-thalia-en",
   },
@@ -190,7 +190,7 @@ Returns a new agent with a fresh id and a copied configuration.
 | `system_prompt` | string | yes | Use sections like `[Identity]`, `[Style]`, etc. See [`agent-prompt`](../../agent-prompt/SKILL.md) |
 | `language` | string | yes | ISO code like `"en"` |
 | `region` | string | yes | One of `us-east`, `eu-central`, `ap-south` |
-| `models` | object | yes | Required keys: `stt`, `llm`, `tts`, `tts_voice`. Optional: `stt_kwargs`, `llm_kwargs`, `tts_kwargs` |
+| `models` | object | yes | Required keys: `stt`, `llm`, `tts`, `tts_voice`. Optional: `stt_kwargs`, `llm_kwargs`, `tts_kwargs`. `llm` must be one of the IDs in [Available LLMs](../SKILL.md#available-llms) |
 | `tools` | array | no | Webhook tool definitions |
 | `template_defaults` | object | no | Fallback values for `{{vars}}` |
 | `enable_interruptions` | boolean | no | Defaults to `true` |
