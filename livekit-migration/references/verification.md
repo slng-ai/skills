@@ -50,10 +50,10 @@ def test_stt_is_slng_nova_3():
     assert stt._model == "deepgram/nova:3"
 
 
-def test_tts_is_slng_aura_2():
-    tts = slng.TTS(model="slng/deepgram/aura:2-en", voice="aura-2-thalia-en")
+def test_tts_is_slng_sonic_3():
+    tts = slng.TTS(model="cartesia/sonic:3", voice="9626c31c-bec5-4cca-baa8-f8ba9e84c8bc")
     assert isinstance(tts, slng.TTS)
-    assert tts._opts.model == "slng/deepgram/aura:2-en"
+    assert tts._opts.model == "cartesia/sonic:3"
 ```
 
 For a stronger test that asserts the models actually wired into `agent.py` (not just freshly

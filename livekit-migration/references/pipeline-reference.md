@@ -44,26 +44,42 @@ slng.TTS(
 )
 ```
 
-## Models
+## Supported models
 
-Models use a `provider/model:variant` id. Common choices (confirm the live catalog at
-<https://docs.slng.ai/agents/livekit-plugin> before using a model you have not run):
+Models use a `provider/model:variant` id. The `slng/`-prefixed ids are SLNG-hosted; the others route a
+provider through SLNG. This list reflects the SLNG catalog — confirm the current set and exact ids in the
+[SLNG docs](https://docs.slng.ai/agents/livekit-plugin) / dashboard, as it changes over time.
 
-| Stage | Example model ids | Notes |
-|-------|-------------------|-------|
-| STT | `deepgram/nova:3`, `slng/deepgram/nova:3-en`, `slng/deepgram/nova:3-multi`, `soniox/speech-ai-rt:v4` | `nova:3` is the default; `-multi` for auto language |
-| TTS | `deepgram/aura:2`, `cartesia/sonic:3`, `rime/arcana:v3`, `sarvam/bulbul:v3`, `kugelaudio/kugel:2` | Each model has its own voice ids; Rime requires a `voice` per language |
+**STT (`slng.STT`)**
 
-Like-for-like mapping from the standard starter:
+| Model id | Provider | Notes |
+|----------|----------|-------|
+| `slng/deepgram/nova:3-en` | Deepgram | SLNG-hosted Nova 3, lowest latency. `-multi` variant for auto language |
+| `deepgram/nova:2` | Deepgram | Nova 2, lower cost, 36 languages |
+| `soniox/speech-ai:rt-v4` | Soniox | Real-time, diarisation, 60+ languages |
+| `reson8/reson8stt:v1` | Reson8 | 9 European locales, telephony-tuned |
+| `sarvam/saaras:v3` | Sarvam AI | Indian + European languages (24 locales) |
+
+**TTS (`slng.TTS`)** — each model has its own voice ids.
+
+| Model id | Provider | Notes |
+|----------|----------|-------|
+| `slng/rime/arcana:3-en` | Rime | SLNG-hosted Arcana v3, emotional prosody, low TTFB |
+| `slng/deepgram/aura:2-en` | Deepgram | SLNG-hosted Aura 2, pairs natively with Nova 3 STT |
+| `cartesia/sonic:3` | Cartesia | Sonic 3, WebSocket streaming, voice cloning, 40+ languages |
+| `murf/murftts:falcon` | Murf | Studio quality, 16 locales |
+| `kugelaudio/kugel:1-turbo` | KugelAudio | European languages, 26 locales |
+| `soniox/tts-rt:v1` | Soniox | Real-time, 50+ languages |
+| `sarvam/bulbul:v3` | Sarvam AI | 11 Indian-language locales |
+
+(There is no LLM list — the plugin has no LLM; the LLM stays on the orchestrator.)
+
+Like-for-like mapping from the standard starter — keep the same provider, routed through slng:
 
 | Before (LiveKit Inference) | After (slng) |
 |----------------------------|--------------|
 | `deepgram/nova-3` | `deepgram/nova:3` |
-| `cartesia/sonic-3` (voice `<id>`) | `slng/deepgram/aura:2-en`, voice `aura-2-thalia-en` (see known issue) |
-
-> **Known issue:** routing Cartesia TTS through the plugin (`cartesia/sonic:3`) currently fails with
-> `400 Bad Request - Invalid Cartesia-Version header`. Use a Deepgram Aura voice
-> (`slng/deepgram/aura:2-en`) until that is fixed upstream. STT (`deepgram/nova:3`) works fine.
+| `cartesia/sonic-3` (voice `<id>`) | `cartesia/sonic:3` (same voice id) |
 
 ## Regions
 
@@ -106,7 +122,7 @@ In `AgentSession(...)`, replace STT and TTS (leave `vad`, `turn_detection`, and
 
 ```python
 stt=slng.STT(model="deepgram/nova:3", language="multi"),
-tts=slng.TTS(model="slng/deepgram/aura:2-en", voice="aura-2-thalia-en"),
+tts=slng.TTS(model="cartesia/sonic:3", voice="9626c31c-bec5-4cca-baa8-f8ba9e84c8bc"),
 ```
 
 Add `region_override="eu-north-1"` (or your region) to either call for data residency.

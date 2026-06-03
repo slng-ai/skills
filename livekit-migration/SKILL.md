@@ -93,21 +93,17 @@ Report the exact current STT/TTS models (e.g. `deepgram/nova-3`, `cartesia/sonic
 
 ## 4. Ask only what cannot be inferred
 
-Do not interrogate the user on every value. A faithful migration can route the **same provider**
-through slng (e.g. `deepgram/nova-3` → `deepgram/nova:3`), but prefer a model that is known to work
-end-to-end. Ask only when a value cannot be inferred or the default is clearly not acceptable (an
-ambiguous region, or a voice the user has signalled they care about). When you do ask, offer the
-default as the recommended option.
+Do not interrogate the user on every value. The default faithful migration routes the **same provider**
+through slng — keep what the project already uses (e.g. `deepgram/nova-3` → `deepgram/nova:3`,
+`cartesia/sonic-3` → `cartesia/sonic:3`, keeping the voice). Ask only when a value cannot be inferred or
+the default is clearly not acceptable (an ambiguous region, or a voice the user has signalled they care
+about). When you do ask, offer the default as the recommended option.
 
 | Choice | Default (recommended) |
 |--------|-----------------------|
-| STT model | `deepgram/nova:3` (language as today; verified working) |
-| TTS model + voice | `slng/deepgram/aura:2-en` with voice `aura-2-thalia-en` (verified working) |
+| STT model | Current provider via slng, e.g. `deepgram/nova:3` (keep today's language) |
+| TTS model + voice | Current provider via slng, e.g. `cartesia/sonic:3` (keep the voice) |
 | Region | Auto (closest). Pin with `region_override`, e.g. `eu-north-1` for EU residency |
-
-> **Known issue:** the `cartesia/sonic:3` TTS model fails through the plugin with
-> `400 Invalid Cartesia-Version header`. Use `slng/deepgram/aura:2-en` (or another non-Cartesia TTS)
-> until that is fixed upstream. This is exactly the kind of stage-level failure step 6 handles.
 
 See [`references/pipeline-reference.md`](references/pipeline-reference.md) for the full catalog of
 models, voices, and regions if the user wants something other than a like-for-like swap.
@@ -202,7 +198,7 @@ code bug:
 | Symptom (in worker logs) | Cause | Fix |
 |--------------------------|-------|-----|
 | `401` on `wss://api.slng.ai/...` handshake; `STT/TTS fallback exhausted` | Missing or invalid `SLNG_API_KEY` in the agent's environment | Put a **valid** key in `.env.local` (step 1). Validate with the `curl … /v1/agents` → `200` check |
-| `400 Bad Request - Invalid Cartesia-Version header` | Known plugin issue routing Cartesia TTS | Use `slng/deepgram/aura:2-en` (voice `aura-2-thalia-en`) instead of `cartesia/sonic:3` |
+| `400 Bad Request - Invalid Cartesia-Version header` | **Server-side gateway issue** — the [Cartesia Sonic 3 API](https://docs.slng.ai/api-reference/tts/cartesia-sonic-3/cartesia-sonic-3-ws) requires no client version header, so this is SLNG's to fix. Cartesia **is** supported; do **not** switch models because of it | Retry; report to SLNG via `lk docs submit-feedback`. Only as a temporary unblock, try another TTS model |
 | No transcription **and** empty Cloud "Agent configuration" panel | The session never ran a healthy turn (usually the `401` above), or `dev` worker idle because an `agent_name=` agent was never dispatched | Fix the key; for explicit dispatch, dispatch the agent and join with a mic client (step 7) |
 | `STT works but TTS fails` (or vice-versa) | A single stage's model is unavailable/broken | This is the step 6 subset case — swap that stage's model, keep the other |
 | `ValueError: api_key is required` at construction | No key resolved when the component is built | Same as `401`: set `SLNG_API_KEY` before launch |
@@ -212,7 +208,7 @@ code bug:
 Summarize what changed (STT/TTS models, region) and confirm the LLM was left on its current provider.
 Per this project's `AGENTS.md`, file `lk docs submit-feedback` for any gap or inaccuracy you hit in
 the slng or LiveKit docs during the migration — for example the package/import surface drifting from
-the docs, or a model (like Cartesia TTS) that fails through the plugin.
+the docs, or a server-side gateway error (like the Cartesia-Version `400`) that the client cannot fix.
 
 ## See also
 
