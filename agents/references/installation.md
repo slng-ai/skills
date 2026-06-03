@@ -39,7 +39,7 @@ agent = client.agents.create(
     region="eu-central",
     models={
         "stt": "slng/deepgram/nova:3-en",
-        "llm": "groq/moonshotai/kimi-k2-instruct-0905",
+        "llm": "groq/openai/gpt-oss-120b",
         "tts": "slng/deepgram/aura:2-en",
         "tts_voice": "aura-2-thalia-en",
     },
@@ -63,7 +63,7 @@ r = requests.post(
         "region": "eu-central",
         "models": {
             "stt": "slng/deepgram/nova:3-en",
-            "llm": "groq/moonshotai/kimi-k2-instruct-0905",
+            "llm": "groq/openai/gpt-oss-120b",
             "tts": "slng/deepgram/aura:2-en",
             "tts_voice": "aura-2-thalia-en",
         },
@@ -91,7 +91,7 @@ const agent = await client.agents.create({
   region: "eu-central",
   models: {
     stt: "slng/deepgram/nova:3-en",
-    llm: "groq/moonshotai/kimi-k2-instruct-0905",
+    llm: "groq/openai/gpt-oss-120b",
     tts: "slng/deepgram/aura:2-en",
     tts_voice: "aura-2-thalia-en",
   },
@@ -116,7 +116,7 @@ const r = await fetch("https://api.agents.slng.ai/v1/agents", {
     region: "eu-central",
     models: {
       stt: "slng/deepgram/nova:3-en",
-      llm: "groq/moonshotai/kimi-k2-instruct-0905",
+      llm: "groq/openai/gpt-oss-120b",
       tts: "slng/deepgram/aura:2-en",
       tts_voice: "aura-2-thalia-en",
     },
@@ -139,7 +139,7 @@ curl https://api.agents.slng.ai/v1/agents \
     "region": "eu-central",
     "models": {
       "stt": "slng/deepgram/nova:3-en",
-      "llm": "groq/moonshotai/kimi-k2-instruct-0905",
+      "llm": "groq/openai/gpt-oss-120b",
       "tts": "slng/deepgram/aura:2-en",
       "tts_voice": "aura-2-thalia-en"
     }

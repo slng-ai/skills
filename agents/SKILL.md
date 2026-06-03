@@ -31,7 +31,7 @@ AGENT_ID=$(curl -sS https://api.agents.slng.ai/v1/agents \
     "region": "eu-central",
     "models": {
       "stt": "slng/deepgram/nova:3-en",
-      "llm": "groq/moonshotai/kimi-k2-instruct-0905",
+      "llm": "groq/openai/gpt-oss-120b",
       "tts": "slng/deepgram/aura:2-en",
       "tts_voice": "aura-2-thalia-en"
     }
@@ -60,7 +60,7 @@ agent = requests.post(f"{BASE}/agents", headers=H, json={
     "region": "eu-central",
     "models": {
         "stt": "slng/deepgram/nova:3-en",
-        "llm": "groq/moonshotai/kimi-k2-instruct-0905",
+        "llm": "groq/openai/gpt-oss-120b",
         "tts": "slng/deepgram/aura:2-en",
         "tts_voice": "aura-2-thalia-en",
     },
@@ -91,7 +91,7 @@ const agent = await fetch(`${BASE}/agents`, {
     region: "eu-central",
     models: {
       stt: "slng/deepgram/nova:3-en",
-      llm: "groq/moonshotai/kimi-k2-instruct-0905",
+      llm: "groq/openai/gpt-oss-120b",
       tts: "slng/deepgram/aura:2-en",
       tts_voice: "aura-2-thalia-en",
     },
@@ -137,7 +137,7 @@ Minimum (all required):
   "region": "eu-central",
   "models": {
     "stt": "slng/deepgram/nova:3-en",
-    "llm": "groq/moonshotai/kimi-k2-instruct-0905",
+    "llm": "groq/openai/gpt-oss-120b",
     "tts": "slng/deepgram/aura:2-en",
     "tts_voice": "aura-2-thalia-en"
   }
@@ -145,6 +145,16 @@ Minimum (all required):
 ```
 
 `region` must be one of `us-east`, `eu-central`, `ap-south`. `models` may also include `stt_kwargs`, `llm_kwargs`, `tts_kwargs` objects to pass provider-specific overrides.
+
+## Available LLMs
+
+The agents API currently accepts these LLM model IDs. Use one of these verbatim — other Groq/Bedrock routes are not provisioned.
+
+| Model | ID | When to pick |
+|---|---|---|
+| GPT OSS 120b | `groq/openai/gpt-oss-120b` | Default. Fastest, best for short turns. |
+| Nemotron Super | `bedrock-mantle/nvidia.nemotron-super-3-120b` | Higher quality for complex prompts / tool use. |
+| Nemotron Nano | `bedrock-mantle/nvidia.nemotron-nano-3-30b` | Lowest latency, simple flows. |
 
 Optional fields:
 
