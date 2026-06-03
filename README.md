@@ -47,6 +47,7 @@ Get a key from the [SLNG dashboard](https://slng.ai/dashboard/api-keys). See the
 | [`speech-to-text`](./speech-to-text) | Transcribe audio (Deepgram Nova, Sarvam Saaras, Soniox, Reson8) |
 | [`agent-prompt`](./agent-prompt) | Build a complete voice agent prompt ready to paste into the SLNG Agent Builder |
 | [`agents`](./agents) | Create, manage, and dispatch SLNG voice agents |
+| [`livekit-migration`](./livekit-migration) | Migrate an existing LiveKit Agents (Python) project to SLNG hosted STT/TTS (livekit-plugins-slng) |
 
 ## Integration paths
 
