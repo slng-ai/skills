@@ -48,6 +48,7 @@ Get a key from the [SLNG dashboard](https://slng.ai/dashboard/api-keys). See the
 | [`agent-prompt`](./agent-prompt) | Build a complete voice agent prompt ready to paste into the SLNG Agent Builder |
 | [`agents`](./agents) | Create, manage, and dispatch SLNG voice agents |
 | [`livekit-migration`](./livekit-migration) | Migrate an existing LiveKit Agents Python project to SLNG hosted STT/TTS |
+| [`custom-migration`](./custom-migration) | Migrate a custom Python/JS voice project to SLNG hosted STT/TTS and optional LLM Router |
 
 ## Integration paths
 
