@@ -1,11 +1,11 @@
 # SLNG LiveKit Pipeline Reference
 
-Models, voices, regions, and the exact wire-up for migrating a LiveKit agent's STT and TTS to the
-SLNG plugin. Treat this as a reference, not as the migration workflow. The workflow lives in
+Models, voices, regions, and the exact wire-up for migrating a LiveKit agent's STT/TTS to the
+SLNG plugin, with optional SLNG LLM Router wiring. Treat this as a reference, not as the migration workflow. The workflow lives in
 [`../SKILL.md`](../SKILL.md).
 
-> The plugin exposes `slng.STT` and `slng.TTS` only. There is no `LLM` and no `Intelligence` class.
-> The agent's LLM stays on its current provider.
+> `livekit-plugins-slng` exposes `slng.STT` and `slng.TTS` only. There is no `slng.LLM` and no
+> `Intelligence` class. If SLNG LLM was selected, use LiveKit's OpenAI-compatible plugin.
 
 ## Install and import
 
@@ -78,7 +78,38 @@ current SLNG docs or dashboard when the mapping is not obvious from the project.
 | `soniox/tts-rt:v1` | Soniox | Real-time, 50+ languages |
 | `sarvam/bulbul:v3` | Sarvam AI | 11 Indian-language locales |
 
-(There is no LLM list. The plugin has no LLM; the LLM stays on the orchestrator.)
+## Optional LLM - SLNG LLM Router
+
+Only migrate the LLM when the user or generated stack explicitly selected SLNG LLM. Otherwise keep
+the project's existing LLM unchanged.
+
+The SLNG LLM Router is OpenAI-compatible at `/v1/chat/completions`, so use LiveKit's OpenAI plugin
+with a custom `base_url`. Do not add `slng.LLM`.
+
+```python
+import os
+from livekit.plugins import openai
+
+llm = openai.LLM(
+    model="slng/auto",  # or the selected router model id
+    api_key=os.environ["SLNG_API_KEY"],
+    base_url="https://us.llm-router.slng.ai/v1",
+)
+```
+
+Regional base URLs:
+
+| Selection | Router base URL |
+|-----------|-----------------|
+| India | `https://india.llm-router.slng.ai/v1` |
+| United States | `https://us.llm-router.slng.ai/v1` |
+| Europe | `https://eu.llm-router.slng.ai/v1` |
+| Indonesia | `https://indonesia.llm-router.slng.ai/v1` |
+
+Supported public model ids include `slng/auto` plus configured router model ids such as
+`groq/openai/gpt-oss-120b`. Some prompts may include the Chat Completions suffix form
+`groq/openai/gpt-oss-120b/chat/completions`; use the selected id exactly unless the router docs for
+the user's deployment say to normalize it.
 
 Like-for-like examples from the standard starter:
 
@@ -102,7 +133,8 @@ slng.STT(model="deepgram/nova:3", region_override="eu-north-1")
 In the standard `agent-starter-python` layout:
 
 - **STT and TTS** are often on `AgentSession(stt=..., tts=...)`. These are what SLNG replaces.
-- **LLM** is often on the `Agent` subclass (`Agent.__init__(llm=...)`) and stays unchanged.
+- **LLM** is often on the `Agent` subclass (`Agent.__init__(llm=...)`). It stays unchanged unless
+  SLNG LLM was selected, in which case configure LiveKit's OpenAI-compatible LLM there.
 - **VAD** (`silero`), **turn detection** (`MultilingualModel`), and any **noise cancellation** plugin
   (e.g. `ai_coustics`) stay as they are unless the user opts to remove them.
 
@@ -124,7 +156,7 @@ from livekit.plugins import slng
 ```
 
 In `AgentSession(...)`, replace STT and TTS (leave `vad`, `turn_detection`, and
-`preemptive_generation` as they are, and leave the LLM on the `Agent`):
+`preemptive_generation` as they are, and leave the LLM on the `Agent` unless SLNG LLM was selected):
 
 ```python
 stt=slng.STT(model="deepgram/nova:3", language="multi"),
@@ -132,6 +164,19 @@ tts=slng.TTS(model="cartesia/sonic:3", voice="9626c31c-bec5-4cca-baa8-f8ba9e84c8
 ```
 
 Add `region_override="eu-north-1"` (or your region) to either call for data residency.
+
+If SLNG LLM was selected, update the existing LLM constructor separately:
+
+```python
+from livekit.plugins import openai
+
+# ... wherever the current LLM is constructed:
+llm=openai.LLM(
+    model="slng/auto",
+    api_key=os.environ["SLNG_API_KEY"],
+    base_url="https://eu.llm-router.slng.ai/v1",
+)
+```
 
 Keep the project's existing entrypoint. In the official starter that is usually `src/agent.py`, and
 the Dockerfile may run `uv run src/agent.py start`, but other projects differ.

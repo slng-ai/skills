@@ -1,6 +1,6 @@
 ---
 name: livekit-migration
-description: Migrate an existing LiveKit Agents Python project to SLNG hosted speech infrastructure for STT and TTS via livekit-plugins-slng. Use when the user asks to "move my LiveKit agent to slng", "use slng for STT/TTS in LiveKit", "swap Deepgram/Cartesia for slng", "add the slng livekit plugin", or "migrate livekit to slng".
+description: Migrate an existing LiveKit Agents Python project to SLNG hosted speech infrastructure for STT/TTS via livekit-plugins-slng, with optional SLNG LLM Router support through LiveKit's OpenAI-compatible plugin. Use when the user asks to "move my LiveKit agent to slng", "use slng for STT/TTS in LiveKit", "swap Deepgram/Cartesia for slng", "add the slng livekit plugin", "use SLNG LLM router in LiveKit", or "migrate livekit to slng".
 license: MIT
 compatibility: Requires a LiveKit Agents Python project, internet access, and a SLNG_API_KEY for runtime verification. Works with uv, Poetry, pip, or other Python dependency managers when detected.
 ---
@@ -9,14 +9,16 @@ compatibility: Requires a LiveKit Agents Python project, internet access, and a 
 
 Move an existing LiveKit Agents Python project onto SLNG hosted speech infrastructure by replacing
 the speech-to-text and text-to-speech stages with `slng.STT` and `slng.TTS` from
-`livekit-plugins-slng`.
+`livekit-plugins-slng`. If the user explicitly selected SLNG LLM, optionally point the project's
+LLM at the SLNG OpenAI-compatible LLM Router through LiveKit's OpenAI plugin.
 
-This is a pipeline migration, not an agent rewrite. Preserve the user's LLM, prompts, tools, VAD,
-turn detection, room wiring, dispatch behavior, and business logic unless the user explicitly asks
-to change them.
+This is a pipeline migration, not an agent rewrite. Preserve prompts, tools, VAD, turn detection,
+room wiring, dispatch behavior, and business logic. Preserve the user's current LLM unless the user
+or generated stack explicitly asks for SLNG LLM.
 
-> Scope: the SLNG LiveKit plugin exposes `slng.STT` and `slng.TTS`. It does not provide an LLM class.
-> Keep the current LLM provider and report that it was intentionally left unchanged.
+> Scope: `livekit-plugins-slng` exposes `slng.STT` and `slng.TTS`. It does not provide an LLM class.
+> If SLNG LLM is selected, use LiveKit's OpenAI-compatible LLM support with a custom `base_url`.
+> Never add or reference `slng.LLM`.
 
 Use these references only when needed:
 
@@ -33,8 +35,8 @@ Use these references only when needed:
   data residency requirement.
 - Keep edits minimal and idempotent. Running the migration twice should not duplicate imports,
   dependencies, tests, or constructor arguments.
-- Stop before code edits if the plugin cannot be installed and imported. Do not guess alternate package
-  names or import paths.
+- Stop before code edits if the required plugin cannot be installed and imported. Do not guess alternate
+  package names or import paths.
 - Never print, paste, log, or commit API keys.
 
 ## 1. Discover the Existing Project
@@ -48,9 +50,11 @@ Before editing, inspect enough local context to identify:
 - Current STT, TTS, LLM, VAD, turn detection, and noise cancellation wiring.
 - Where STT and TTS are constructed: `AgentSession(...)`, a factory function, an agent class, or
   another module.
+- Where the LLM is constructed, only if SLNG LLM was selected.
 - Existing tests and quality commands, if any.
 
-Report the discovered STT, TTS, and LLM providers before changing anything. Use
+Report the discovered STT, TTS, and LLM providers before changing anything, including whether the LLM
+will stay unchanged or move to the SLNG LLM Router. Use
 [`references/project-discovery.md`](references/project-discovery.md) for command examples.
 
 ## 2. Establish a Rollback Point
@@ -68,9 +72,9 @@ without automatic rollback. Do not run `git init` without user confirmation.
 
 ## 3. Validate Credentials Without Exposing Them
 
-The LiveKit plugin reads `SLNG_API_KEY` by default. If the project already has `VOICEAI_API_KEY` and
-`SLNG_API_KEY` is missing, treat `VOICEAI_API_KEY` as the same SLNG credential only after validation,
-then configure `SLNG_API_KEY` for the LiveKit runtime.
+The SLNG LiveKit plugin and the SLNG LLM Router both use `SLNG_API_KEY`. If the project already has
+`VOICEAI_API_KEY` and `SLNG_API_KEY` is missing, treat `VOICEAI_API_KEY` as the same SLNG credential
+only after validation, then configure `SLNG_API_KEY` for the LiveKit runtime.
 
 Check presence without printing the value:
 
@@ -86,7 +90,7 @@ Store the key using the project's discovered env convention. For the official st
 `.env.local`; other projects may use `.env`, shell env, deployment secrets, or container config.
 Confirm any local env file is ignored by git before writing to it.
 
-## 4. Install and Probe the Plugin
+## 4. Install and Probe Required Plugins
 
 Install `livekit-plugins-slng` with the detected package manager:
 
@@ -110,6 +114,16 @@ uv run python -c "from livekit.plugins import slng; assert slng.STT and slng.TTS
 If the import fails, stop before editing code. Report the exact failure and point the user at the
 current SLNG LiveKit plugin docs to confirm the package and import surface.
 
+If SLNG LLM was selected, also ensure the project has LiveKit's OpenAI plugin and probe its import.
+Use the package manager and import style already used by the project; common examples are:
+
+```bash
+uv add livekit-plugins-openai
+uv run python -c "from livekit.plugins import openai; assert openai.LLM"
+```
+
+Do not use `livekit-plugins-slng` for LLM wiring.
+
 ## 5. Plan the Speech Swap
 
 Default to a faithful migration:
@@ -117,7 +131,9 @@ Default to a faithful migration:
 - Keep the current STT provider/model through SLNG when a clear mapping exists.
 - Keep the current TTS provider/model and voice through SLNG when a clear mapping exists.
 - Keep the current language and sample-rate choices unless SLNG requires a different representation.
-- Leave the LLM and non-speech LiveKit components unchanged.
+- Leave the LLM and non-speech LiveKit components unchanged unless SLNG LLM was selected.
+- If SLNG LLM was selected, replace only the LLM constructor with LiveKit's OpenAI-compatible LLM
+  pointed at the selected SLNG LLM Router base URL.
 - Use automatic region selection unless the user needs a pinned region for latency or residency.
 
 Ask the user only when the current project does not contain enough information to choose safely. If a
@@ -132,17 +148,20 @@ Add the import once:
 from livekit.plugins import slng
 ```
 
-Replace only STT and TTS constructors with `slng.STT(...)` and `slng.TTS(...)`. Preserve the rest of
-the session and agent configuration.
+Replace only STT and TTS constructors with `slng.STT(...)` and `slng.TTS(...)`. If SLNG LLM was
+selected, replace only the current LLM constructor with LiveKit OpenAI-compatible LLM configuration.
+Preserve the rest of the session and agent configuration.
 
 Do not inline secrets. Usually no explicit `api_key` argument is needed because the plugin reads
 `SLNG_API_KEY`. If the call site must be explicit, use `os.environ["SLNG_API_KEY"]`, never a literal.
+Use the same env var for the LLM Router.
 
 Before inserting anything, check whether the project already contains:
 
 - `livekit-plugins-slng` in dependencies
 - `from livekit.plugins import slng`
 - `slng.STT(...)` or `slng.TTS(...)`
+- a LiveKit OpenAI plugin dependency/import, if SLNG LLM was selected
 - a prior SLNG pipeline test
 
 Run the project's existing formatter and lint commands if present. Do not introduce new tooling just
@@ -154,7 +173,7 @@ Use the cheapest checks first, then require a live spoken turn for acceptance:
 
 1. `git diff --check`
 2. Secret scan of the diff for literal keys
-3. Existing project tests, plus a focused STT/TTS wiring assertion when practical
+3. Existing project tests, plus a focused STT/TTS and optional LLM wiring assertion when practical
 4. Entrypoint boot or download/preload command, if the project has one
 5. Live spoken turn that completes STT -> LLM -> TTS
 
@@ -169,7 +188,7 @@ Finish with:
 - Entrypoint and package manager detected
 - STT before and after
 - TTS before and after, including voice if known
-- LLM provider left unchanged
+- LLM before and after, or LLM provider left unchanged
 - Region behavior, auto or pinned
 - Tests/checks run and any checks not run
 - Whether a live spoken turn succeeded

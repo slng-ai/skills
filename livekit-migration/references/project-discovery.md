@@ -45,9 +45,10 @@ Search for dotenv and env references:
 rg -n "load_dotenv|SLNG_API_KEY|VOICEAI_API_KEY|os\.environ|getenv|dotenv" .
 ```
 
-The SLNG LiveKit plugin reads `SLNG_API_KEY` by default. Some SLNG projects may already have
-`VOICEAI_API_KEY` for the CLI or REST skills. If `VOICEAI_API_KEY` is present and validated, configure
-`SLNG_API_KEY` to the same value for the LiveKit runtime instead of asking for a second key.
+The SLNG LiveKit plugin reads `SLNG_API_KEY` by default. The SLNG LLM Router uses the same variable
+when SLNG LLM is selected. Some SLNG projects may already have `VOICEAI_API_KEY` for the CLI or REST
+skills. If `VOICEAI_API_KEY` is present and validated, configure `SLNG_API_KEY` to the same value for
+the LiveKit runtime instead of asking for a second key.
 
 Store secrets where the project already expects runtime secrets:
 
@@ -64,7 +65,8 @@ Read the entrypoint and imported modules to locate each stage:
 
 - STT: `stt=...`, `STT(...)`, `transcription`, or speech recognizer config
 - TTS: `tts=...`, `TTS(...)`, voice config, or synthesizer config
-- LLM: `llm=...`, `LLM(...)`, `openai`, `anthropic`, `inference.LLM`, or custom model clients
+- LLM: `llm=...`, `LLM(...)`, `openai`, `anthropic`, `inference.LLM`, or custom model clients.
+  Preserve this unless the user explicitly selected SLNG LLM.
 - VAD and turn detection: `vad=...`, `silero`, `turn_detection`, `MultilingualModel`
 - dispatch behavior: `agent_name=`, `WorkerOptions`, explicit dispatch docs
 
@@ -82,4 +84,12 @@ STT: ...
 TTS: ...
 LLM: ... (will stay unchanged)
 VAD/turn detection: ... (will stay unchanged)
+```
+
+If SLNG LLM was selected, report:
+
+```text
+LLM: ... (will migrate to SLNG LLM Router via LiveKit OpenAI-compatible plugin)
+LLM router base URL: ...
+LLM router model: ...
 ```
