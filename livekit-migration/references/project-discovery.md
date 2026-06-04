@@ -86,10 +86,12 @@ LLM: ... (will stay unchanged)
 VAD/turn detection: ... (will stay unchanged)
 ```
 
-If SLNG LLM was selected, report:
+If provisioned SLNG LLM Router was selected, report:
 
 ```text
 LLM: ... (will migrate to SLNG LLM Router via LiveKit OpenAI-compatible plugin)
 LLM router base URL: ...
-LLM router model: ...
+LLM router model: slng/auto
+Router org config: provisioned / not confirmed
+Router headers: stable agent id ..., stable session id ...
 ```

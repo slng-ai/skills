@@ -9,15 +9,17 @@ compatibility: Requires a LiveKit Agents Python project, internet access, and a 
 
 Move an existing LiveKit Agents Python project onto SLNG hosted speech infrastructure by replacing
 the speech-to-text and text-to-speech stages with `slng.STT` and `slng.TTS` from
-`livekit-plugins-slng`. If the user explicitly selected SLNG LLM, optionally point the project's
-LLM at the SLNG OpenAI-compatible LLM Router through LiveKit's OpenAI plugin.
+`livekit-plugins-slng`. If the user explicitly selected SLNG LLM and SLNG has provisioned the
+customer's org/router configuration, point the project's LLM at the SLNG OpenAI-compatible LLM
+Router through LiveKit's OpenAI plugin.
 
 This is a pipeline migration, not an agent rewrite. Preserve prompts, tools, VAD, turn detection,
 room wiring, dispatch behavior, and business logic. Preserve the user's current LLM unless the user
-or generated stack explicitly asks for SLNG LLM.
+or generated stack explicitly asks for provisioned SLNG LLM Router.
 
 > Scope: `livekit-plugins-slng` exposes `slng.STT` and `slng.TTS`. It does not provide an LLM class.
 > If SLNG LLM is selected, use LiveKit's OpenAI-compatible LLM support with a custom `base_url`.
+> Use the agent-facing model `slng/auto`; provider/catalog model ids belong in SLNG org config.
 > Never add or reference `slng.LLM`.
 
 Use these references only when needed:
@@ -32,7 +34,8 @@ Use these references only when needed:
 - Adapt to the project in front of you. Do not assume `src/agent.py`, `uv`, `.env.local`, `ruff`, or
   pytest unless discovery confirms them.
 - Ask only for choices that cannot be inferred safely, such as an ambiguous model, voice, language, or
-  data residency requirement.
+  data residency requirement. Do not ask the user to choose an LLM provider/catalog model id for
+  router code; SLNG provisions that in org config.
 - Keep edits minimal and idempotent. Running the migration twice should not duplicate imports,
   dependencies, tests, or constructor arguments.
 - Stop before code edits if the required plugin cannot be installed and imported. Do not guess alternate
@@ -54,7 +57,7 @@ Before editing, inspect enough local context to identify:
 - Existing tests and quality commands, if any.
 
 Report the discovered STT, TTS, and LLM providers before changing anything, including whether the LLM
-will stay unchanged or move to the SLNG LLM Router. Use
+will stay unchanged or move to the provisioned SLNG LLM Router. Use
 [`references/project-discovery.md`](references/project-discovery.md) for command examples.
 
 ## 2. Establish a Rollback Point
@@ -114,7 +117,11 @@ uv run python -c "from livekit.plugins import slng; assert slng.STT and slng.TTS
 If the import fails, stop before editing code. Report the exact failure and point the user at the
 current SLNG LiveKit plugin docs to confirm the package and import surface.
 
-If SLNG LLM was selected, also ensure the project has LiveKit's OpenAI plugin and probe its import.
+If SLNG LLM was selected, first confirm SLNG org/router configuration has been provisioned for this
+customer. If it has not, stop and report that SLNG must configure the customer's provider/model/API-key
+settings before LLM migration can be verified.
+
+Then ensure the project has LiveKit's OpenAI plugin and probe its import.
 Use the package manager and import style already used by the project; common examples are:
 
 ```bash
@@ -133,7 +140,8 @@ Default to a faithful migration:
 - Keep the current language and sample-rate choices unless SLNG requires a different representation.
 - Leave the LLM and non-speech LiveKit components unchanged unless SLNG LLM was selected.
 - If SLNG LLM was selected, replace only the LLM constructor with LiveKit's OpenAI-compatible LLM
-  pointed at the selected SLNG LLM Router base URL.
+  pointed at the selected regional SLNG LLM Router base URL, `model="slng/auto"`, and required
+  `X-SLNG-Agent-ID` / `X-SLNG-Session-ID` headers from stable project identifiers.
 - Use automatic region selection unless the user needs a pinned region for latency or residency.
 
 Ask the user only when the current project does not contain enough information to choose safely. If a
@@ -154,7 +162,10 @@ Preserve the rest of the session and agent configuration.
 
 Do not inline secrets. Usually no explicit `api_key` argument is needed because the plugin reads
 `SLNG_API_KEY`. If the call site must be explicit, use `os.environ["SLNG_API_KEY"]`, never a literal.
-Use the same env var for the LLM Router.
+Use the same env var for the LLM Router. For LLM Router, use `model="slng/auto"` and add
+`X-SLNG-Agent-ID` and `X-SLNG-Session-ID` as headers using stable identifiers already present in the
+agent/session/room context. Do not generate random IDs per request, and do not expose provider/catalog
+model ids in code.
 
 Before inserting anything, check whether the project already contains:
 

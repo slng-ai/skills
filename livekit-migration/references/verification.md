@@ -31,9 +31,10 @@ literal key.
 ## 3. Unit Test
 
 Prefer a test that imports the project's own pipeline factory or session builder and asserts the
-configured STT and TTS are `slng.STT` and `slng.TTS`. If SLNG LLM was selected, assert the LLM is the
-LiveKit OpenAI-compatible LLM configured with the selected `base_url`, `model`, and environment-backed
-API key. This catches future edits to the actual agent.
+configured STT and TTS are `slng.STT` and `slng.TTS`. If provisioned SLNG LLM Router was selected,
+assert the LLM is the LiveKit OpenAI-compatible LLM configured with the selected regional `base_url`,
+`model="slng/auto"`, environment-backed API key, and required `X-SLNG-Agent-ID` /
+`X-SLNG-Session-ID` headers. This catches future edits to the actual agent.
 
 If the project has no factory, add one only when it keeps the edit small and makes the pipeline easier
 to test. Do not refactor unrelated business logic just to add a test.
@@ -79,8 +80,8 @@ python -m pytest
 ## 4. Live-turn check - the real acceptance gate
 
 A passing unit test and clean `ruff` only prove the code is wired to the right strings. They pass even
-when the agent is broken at runtime (unavailable model, invalid key, provider rejecting the request,
-or LLM Router rejecting a selected model id).
+when the agent is broken at runtime (missing org/router config, invalid key, provider rejecting the
+request, or unstable agent/session identifiers preventing router behavior).
 **Only a live spoken turn that completes STT -> LLM -> TTS proves the migration works.** This step needs
 a real `SLNG_API_KEY` in the project's runtime environment, validated against `/v1/agents`, and LiveKit
 credentials.
@@ -122,8 +123,10 @@ uv run ruff check
 - [ ] `from livekit.plugins import slng` imports successfully.
 - [ ] STT and TTS are `slng.STT` / `slng.TTS` wired to the intended models.
 - [ ] The LLM was left on its current provider, unless SLNG LLM was selected.
+- [ ] If SLNG LLM was selected, SLNG org/router configuration is provisioned.
 - [ ] If SLNG LLM was selected, the LLM uses LiveKit's OpenAI-compatible plugin, the selected regional
-      LLM Router base URL, and no `slng.LLM` reference.
+      LLM Router base URL, `model="slng/auto"`, required `X-SLNG-Agent-ID` / `X-SLNG-Session-ID`
+      headers, and no `slng.LLM` reference.
 - [ ] No API key literal appears in the diff.
 - [ ] Project tests pass, including any STT/TTS assertions added for this migration.
 - [ ] `SLNG_API_KEY` is available to the runtime and validates against `/v1/agents`.

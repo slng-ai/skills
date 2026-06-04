@@ -7,7 +7,8 @@ and selected stages.
 
 - Python STT/TTS SDK: `voiceai-sdk`
 - JavaScript/TypeScript STT/TTS SDK: `voiceai-sdk`
-- LLM: use an OpenAI-compatible client with an SLNG Router `base_url`/`baseURL`
+- LLM: use an OpenAI-compatible client with an SLNG Router `base_url`/`baseURL`, provisioned org
+  config, `slng/auto`, and required agent/session headers
 
 Do not use fake packages such as `slng-sdk`, or fake classes such as `VoiceAgent`, `STT`, `TTS`,
 `LLM`, or `Intelligence`, unless the target project already defines those names.
@@ -72,8 +73,9 @@ Use `StreamingClient` only when replacing an existing streaming STT/TTS seam. Do
 
 ## Optional LLM Router
 
-Only migrate the LLM when selected. Prefer the project's existing OpenAI-compatible client if present.
-Otherwise add the standard OpenAI SDK for the project language.
+Only migrate the LLM when selected and SLNG has provisioned org/router configuration for the customer.
+Prefer the project's existing OpenAI-compatible client if present. Otherwise add the standard OpenAI
+SDK for the project language.
 
 Regional router base URLs:
 
@@ -93,6 +95,10 @@ from openai import OpenAI
 llm = OpenAI(
     api_key=os.environ["SLNG_API_KEY"],
     base_url="https://us.llm-router.slng.ai/v1",
+    default_headers={
+        "X-SLNG-Agent-ID": agent_id,
+        "X-SLNG-Session-ID": session_id,
+    },
 )
 
 response = llm.chat.completions.create(
@@ -109,6 +115,10 @@ import OpenAI from "openai";
 const llm = new OpenAI({
   apiKey: process.env.SLNG_API_KEY,
   baseURL: "https://us.llm-router.slng.ai/v1",
+  defaultHeaders: {
+    "X-SLNG-Agent-ID": agentId,
+    "X-SLNG-Session-ID": sessionId,
+  },
 });
 
 const response = await llm.chat.completions.create({
@@ -117,8 +127,14 @@ const response = await llm.chat.completions.create({
 });
 ```
 
-Use the selected model id, defaulting to `slng/auto`. Preserve streaming behavior if the old LLM call
-streamed.
+Use `slng/auto` as the only code-level model. Do not place provider/catalog model ids in customer
+code; SLNG configures provider models, customer provider API keys, routing policy, cache behavior,
+and other router parameters in org configuration. If org configuration is not ready, stop before LLM
+edits and report that SLNG must provision it before verification.
+
+Use stable project identifiers for `agent_id`/`agentId` and `session_id`/`sessionId`, such as an app
+agent id plus conversation, room, call, or session id. Do not generate random IDs per request. Preserve
+streaming behavior if the old LLM call streamed.
 
 ## Region and Model Notes
 

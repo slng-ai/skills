@@ -8,7 +8,8 @@ compatibility: Requires an existing Python, JavaScript, or TypeScript project wi
 # Migrate a Custom Voice Project to SLNG
 
 Move an existing custom project onto SLNG hosted models by replacing selected provider boundaries:
-STT and TTS use `voiceai-sdk`; LLM uses the SLNG OpenAI-compatible LLM Router only when selected.
+STT and TTS use `voiceai-sdk`; LLM uses the provisioned SLNG OpenAI-compatible LLM Router only when
+selected.
 
 This is not a framework rewrite. Preserve routing, prompts, tools, storage, transports, UI, queues,
 telephony, session state, and business logic. Only replace STT/TTS/LLM call sites that are already
@@ -31,7 +32,8 @@ Use these references only when needed:
 - Keep edits minimal and idempotent. Running the migration twice should not duplicate dependencies,
   imports, env wiring, adapter functions, tests, or constructor arguments.
 - Replace only selected stages. If the user selected STT/TTS only, preserve the LLM. If the user
-  selected SLNG LLM, migrate the LLM through OpenAI-compatible wiring.
+  selected SLNG LLM, migrate the LLM through OpenAI-compatible wiring only after SLNG org/router
+  configuration has been provisioned.
 - Stop before code edits if there is no sensible provider boundary. Report the smallest adapter seam
   to create instead of scattering SDK calls through business logic.
 - Never print, paste, log, or commit API keys.
@@ -97,8 +99,12 @@ python -c "from voiceai import Slng, AsyncSlng; assert Slng and AsyncSlng"
 node -e "import('voiceai-sdk').then(m => { if (!m.default) process.exit(1) })"
 ```
 
-If SLNG LLM was selected, use an existing OpenAI-compatible client if present. Otherwise install the
-standard OpenAI SDK for the project language and probe it. Do not invent an SLNG LLM SDK class.
+If SLNG LLM was selected, first confirm SLNG org/router configuration has been provisioned for this
+customer. If it has not, stop and report that SLNG must configure the customer's provider/model/API-key
+settings before LLM migration can be verified.
+
+Then use an existing OpenAI-compatible client if present. Otherwise install the standard OpenAI SDK
+for the project language and probe it. Do not invent an SLNG LLM SDK class.
 
 ## 5. Plan the Stage Swap
 
@@ -109,7 +115,8 @@ Default to a faithful migration:
 - TTS: keep current text input, voice, language, streaming or batch mode, and audio output contract
   when possible.
 - LLM: preserve the existing LLM unless SLNG LLM was selected; then point an OpenAI-compatible client
-  at the selected SLNG regional router.
+  at the selected regional SLNG router with `model="slng/auto"` and required
+  `X-SLNG-Agent-ID` / `X-SLNG-Session-ID` headers from stable project identifiers.
 - Add one small adapter module only when it makes the diff easier to review.
 - If a selected model or mode is unsupported, migrate the stages that work and leave the failing stage
   unchanged. Report the partial migration clearly.
@@ -122,6 +129,10 @@ framework or rename project concepts.
 Use `os.environ["SLNG_API_KEY"]` in Python and `process.env.SLNG_API_KEY` in server-side JavaScript.
 For browser code, do not expose the key; route through an existing backend or stop and report that a
 server-side boundary is required.
+
+For LLM Router, use `slng/auto` as the only code-level model. Do not place provider/catalog model ids
+in customer code; those belong in SLNG org configuration. Add `X-SLNG-Agent-ID` and
+`X-SLNG-Session-ID` as headers using stable app identifiers. Do not generate random IDs per request.
 
 Before inserting anything, check whether the project already has:
 

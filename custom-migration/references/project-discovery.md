@@ -34,7 +34,7 @@ Search for speech and model providers:
 ```bash
 rg -n "stt|transcri|speech.?to.?text|deepgram|assembly|whisper|soniox|recogniz|audio" .
 rg -n "tts|text.?to.?speech|synth|speak|voice|cartesia|elevenlabs|rime|murf|aura" .
-rg -n "llm|chat.completions|openai|anthropic|groq|bedrock|azure|generate|completion" .
+rg -n "llm|chat.completions|openai|anthropic|bedrock|azure|generate|completion" .
 ```
 
 Classify each selected stage before editing:

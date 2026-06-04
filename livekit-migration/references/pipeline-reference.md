@@ -5,7 +5,8 @@ SLNG plugin, with optional SLNG LLM Router wiring. Treat this as a reference, no
 [`../SKILL.md`](../SKILL.md).
 
 > `livekit-plugins-slng` exposes `slng.STT` and `slng.TTS` only. There is no `slng.LLM` and no
-> `Intelligence` class. If SLNG LLM was selected, use LiveKit's OpenAI-compatible plugin.
+> `Intelligence` class. If provisioned SLNG LLM Router was selected, use LiveKit's
+> OpenAI-compatible plugin.
 
 ## Install and import
 
@@ -80,8 +81,9 @@ current SLNG docs or dashboard when the mapping is not obvious from the project.
 
 ## Optional LLM - SLNG LLM Router
 
-Only migrate the LLM when the user or generated stack explicitly selected SLNG LLM. Otherwise keep
-the project's existing LLM unchanged.
+Only migrate the LLM when the user or generated stack explicitly selected SLNG LLM Router and SLNG
+has provisioned org/router configuration for the customer. Otherwise keep the project's existing LLM
+unchanged.
 
 The SLNG LLM Router is OpenAI-compatible at `/v1/chat/completions`, so use LiveKit's OpenAI plugin
 with a custom `base_url`. Do not add `slng.LLM`.
@@ -91,11 +93,19 @@ import os
 from livekit.plugins import openai
 
 llm = openai.LLM(
-    model="slng/auto",  # or the selected router model id
+    model="slng/auto",
     api_key=os.environ["SLNG_API_KEY"],
     base_url="https://us.llm-router.slng.ai/v1",
+    extra_headers={
+        "X-SLNG-Agent-ID": agent_id,
+        "X-SLNG-Session-ID": session_id,
+    },
 )
 ```
+
+Use stable project identifiers for `agent_id` and `session_id`, such as the configured LiveKit agent
+name and room/session id. Do not generate random IDs per request. These headers are required for
+agent-context routing, tracing, caching, and token-savings behavior.
 
 Regional base URLs:
 
@@ -106,10 +116,10 @@ Regional base URLs:
 | Europe | `https://eu.llm-router.slng.ai/v1` |
 | Indonesia | `https://indonesia.llm-router.slng.ai/v1` |
 
-Supported public model ids include `slng/auto` plus configured router model ids such as
-`groq/openai/gpt-oss-120b`. Some prompts may include the Chat Completions suffix form
-`groq/openai/gpt-oss-120b/chat/completions`; use the selected id exactly unless the router docs for
-the user's deployment say to normalize it.
+The public agent-facing model is `slng/auto`. Do not place provider/catalog model ids in customer
+code; SLNG configures provider models, customer provider API keys, routing policy, cache behavior,
+and other router parameters in org configuration. If that org configuration is not ready, stop before
+LLM edits and report that SLNG must provision it before verification.
 
 Like-for-like examples from the standard starter:
 
@@ -134,7 +144,8 @@ In the standard `agent-starter-python` layout:
 
 - **STT and TTS** are often on `AgentSession(stt=..., tts=...)`. These are what SLNG replaces.
 - **LLM** is often on the `Agent` subclass (`Agent.__init__(llm=...)`). It stays unchanged unless
-  SLNG LLM was selected, in which case configure LiveKit's OpenAI-compatible LLM there.
+  provisioned SLNG LLM Router was selected, in which case configure LiveKit's OpenAI-compatible LLM
+  there.
 - **VAD** (`silero`), **turn detection** (`MultilingualModel`), and any **noise cancellation** plugin
   (e.g. `ai_coustics`) stay as they are unless the user opts to remove them.
 
@@ -156,7 +167,8 @@ from livekit.plugins import slng
 ```
 
 In `AgentSession(...)`, replace STT and TTS (leave `vad`, `turn_detection`, and
-`preemptive_generation` as they are, and leave the LLM on the `Agent` unless SLNG LLM was selected):
+`preemptive_generation` as they are, and leave the LLM on the `Agent` unless provisioned SLNG LLM
+Router was selected):
 
 ```python
 stt=slng.STT(model="deepgram/nova:3", language="multi"),
@@ -165,7 +177,7 @@ tts=slng.TTS(model="cartesia/sonic:3", voice="9626c31c-bec5-4cca-baa8-f8ba9e84c8
 
 Add `region_override="eu-north-1"` (or your region) to either call for data residency.
 
-If SLNG LLM was selected, update the existing LLM constructor separately:
+If provisioned SLNG LLM Router was selected, update the existing LLM constructor separately:
 
 ```python
 from livekit.plugins import openai
@@ -175,6 +187,10 @@ llm=openai.LLM(
     model="slng/auto",
     api_key=os.environ["SLNG_API_KEY"],
     base_url="https://eu.llm-router.slng.ai/v1",
+    extra_headers={
+        "X-SLNG-Agent-ID": agent_id,
+        "X-SLNG-Session-ID": session_id,
+    },
 )
 ```
 
