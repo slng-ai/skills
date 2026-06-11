@@ -70,12 +70,12 @@ Unified endpoint shape: `POST /v1/stt/{provider}/{model}:{variant}` for files, `
 |----------|-----------|----------|
 | `slng/deepgram/nova:3-en` | English | Default. High accuracy, fast |
 | `slng/deepgram/nova:3-es` | Spanish | |
-| `slng/deepgram/nova:3-medical` | English (medical) | Healthcare terminology |
+| `deepgram/nova:3-medical` | English (medical) | Healthcare terminology |
 | `slng/deepgram/nova:3-multi` | 30+ langs | Auto language detection |
-| `slng/deepgram/nova:2` | Multilingual | Previous gen, cheaper |
-| `sarvam/saaras:3` | Indic languages | Hindi, Tamil, Telugu, etc. |
-| `soniox/speech-ai:4` | Multilingual | Real-time, ultra-low latency |
-| `reson8/stt:1` | Multilingual | Real-time, telephony-tuned |
+| `deepgram/nova:2` | Multilingual | Previous gen, cheaper |
+| `sarvam/saaras:v3` | Indic languages | Hindi, Tamil, Telugu, etc. |
+| `soniox/speech-ai:rt-v4` | Multilingual | Real-time, ultra-low latency |
+| `reson8/reson8stt:v1` | Multilingual | Real-time, telephony-tuned |
 
 List current deployments:
 
