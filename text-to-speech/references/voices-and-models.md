@@ -4,47 +4,39 @@ slng routes to many TTS providers through one endpoint shape. Pick a **model** (
 
 ## Listing what's deployed
 
-### CLI
+The CLI lists the live catalog (★ = SLNG-hosted):
 
 ```bash
 voiceai models --tts
 voiceai voices --model slng/deepgram/aura:2-en
 ```
 
-### Python
+> A REST/SDK catalog endpoint (`/v1/models`, `/v1/voices`) is not available yet. Until it ships, use
+> the CLI above or the snapshot below. If neither is possible, just attempt a short synthesis with
+> the candidate model/voice — the request itself is the availability check.
 
-```python
-from voiceai import VoiceAI
+## Deployed TTS models (snapshot, June 2026)
 
-client = VoiceAI()
-models = client.models.list(modality="tts")
-for m in models:
-    print(m.id, m.languages)
+`slng/`-prefixed ids are SLNG-hosted; the others route a provider through SLNG. Treat this table as
+a snapshot — the CLI is the live source.
 
-voices = client.voices.list(model="slng/deepgram/aura:2-en")
-for v in voices:
-    print(v.id, v.gender, v.description)
-```
-
-### TypeScript
-
-```typescript
-import { VoiceAI } from "voiceai-sdk";
-
-const client = new VoiceAI();
-const models = await client.models.list({ modality: "tts" });
-const voices = await client.voices.list({ model: "slng/deepgram/aura:2-en" });
-```
-
-### cURL
-
-```bash
-curl https://api.slng.ai/v1/models?modality=tts \
-  -H "Authorization: Bearer $VOICEAI_API_KEY"
-
-curl "https://api.slng.ai/v1/voices?model=slng/deepgram/aura:2-en" \
-  -H "Authorization: Bearer $VOICEAI_API_KEY"
-```
+| Model id | Provider | Notes |
+|----------|----------|-------|
+| `slng/deepgram/aura:2-en` | Deepgram | SLNG-hosted Aura 2, common default |
+| `slng/rime/arcana:3-en` | Rime | SLNG-hosted Arcana v3, high emotional range |
+| `slng/rime/coda:0-id` | Rime | SLNG-hosted Coda v0, Indonesian |
+| `cartesia/sonic:3` | Cartesia | Sonic 3, WebSocket streaming, ultra-low latency |
+| `deepgram/aura:2` | Deepgram | Provider-routed Aura 2 |
+| `elevenlabs/eleven-flash:2` | ElevenLabs | Flash 2 |
+| `elevenlabs/eleven-flash:2.5` | ElevenLabs | Flash 2.5 |
+| `elevenlabs/eleven-multilingual:2` | ElevenLabs | Multilingual 2 |
+| `elevenlabs/eleven:3` | ElevenLabs | Eleven 3 |
+| `kugelaudio/kugel:1` | KugelAudio | Kugel v1 |
+| `kugelaudio/kugel:2` | KugelAudio | Kugel 2, studio quality |
+| `kugelaudio/kugel:2-turbo` | KugelAudio | Kugel 2 Turbo |
+| `murf/murftts:falcon` | Murf | Falcon, realistic brand-friendly voices |
+| `sarvam/bulbul:v3` | Sarvam AI | Hindi, Tamil, Telugu, Marathi, Kannada |
+| `soniox/tts-rt:v1` | Soniox | Real-time streaming |
 
 ## Recommended voices
 
@@ -63,12 +55,12 @@ Masculine: `aura-2-sirio-es`, `aura-2-nestor-es`, `aura-2-alvaro-es`, `aura-2-aq
 
 ### Other providers
 
-- **Rime Arcana v3** — `rime/arcana:3-en`, `rime/arcana:3-hi`, `rime/arcana:3-es`. See `voiceai voices --model rime/arcana:3-en` for the catalog.
-- **Cartesia Sonic 3** — `cartesia/sonic:3`. WebSocket-only.
-- **Sarvam Bulbul v3** — `sarvam/bulbul:3`. Hindi, Tamil, Telugu, Kannada, Marathi.
-- **Kugel** — `kugelaudio/kugel:1`, `kugelaudio/kugel:2`, `kugelaudio/kugel:1-turbo`. WebSocket-only.
-- **Murf Falcon** — `murf/falcon:1`. WebSocket-only.
-- **Soniox TTS v1** — `soniox/tts:1`.
+- **Rime Arcana v3** — `slng/rime/arcana:3-en`. See `voiceai voices --model slng/rime/arcana:3-en` for the catalog.
+- **Cartesia Sonic 3** — `cartesia/sonic:3`. WebSocket-only; Cartesia voice ids (UUIDs) carry over.
+- **Sarvam Bulbul v3** — `sarvam/bulbul:v3`. Hindi, Tamil, Telugu, Kannada, Marathi.
+- **Kugel** — `kugelaudio/kugel:1`, `kugelaudio/kugel:2`, `kugelaudio/kugel:2-turbo`. WebSocket-only.
+- **Murf Falcon** — `murf/murftts:falcon`. WebSocket-only.
+- **Soniox TTS** — `soniox/tts-rt:v1`.
 
 ## Models by region
 
