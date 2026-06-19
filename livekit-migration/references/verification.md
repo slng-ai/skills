@@ -129,7 +129,7 @@ uv run ruff check
       headers, and no `slng.LLM` reference.
 - [ ] No API key literal appears in the diff.
 - [ ] Project tests pass, including any STT/TTS assertions added for this migration.
-- [ ] `SLNG_API_KEY` is available to the runtime and validates against `/v1/agents`.
+- [ ] `SLNG_API_KEY` is available to the runtime and validates against `/v1/me` (e.g. `voiceai whoami`).
 - [ ] A **live turn** completes: user transcript appears in logs **and** the spoken reply is heard (each stage verified independently).
 - [ ] Any stage left on its original provider is reported to the user with how to finish it.
 - [ ] The original entrypoint and deployment command still work.

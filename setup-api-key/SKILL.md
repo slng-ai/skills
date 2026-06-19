@@ -41,18 +41,18 @@ Ask the user to paste the key.
 
 ### 3. Validate the key
 
-If the CLI is installed (v0.1.9 or later), use the built-in `whoami` command. It hits `GET /v1/agents` under the hood — no TTS/STT credits consumed — and prints a masked key plus the agent count on success:
+If the CLI is installed (v0.1.9 or later), use the built-in `whoami` command. It hits `GET /v1/me` under the hood — no TTS/STT credits consumed — and prints a masked key plus the authenticated workspace on success:
 
 ```bash
 voiceai whoami
-# → Authenticated as zpka_…wxyz · 3 agents
+# → ✔ Signed in as slng_cu_...DFTF · [SLNG] Nicolas's Workspace (hobby) · key "cli" · profile: default
 ```
 
 For scripting:
 
 ```bash
 voiceai whoami --json
-# → {"ok":true,"status":200,"masked_key":"zpka_…wxyz","agents_count":3}
+# → {"ok":true,"status":200,"profile":"default","masked_key":"slng_cu_...DFTF","account":{"name":null,"email":null,"org_id":"8b7580a9-a6d1-4ae0-9a09-4457afebe0d2","org_name":"[SLNG] Nicolas's Workspace","api_key_label":"cli","tier":"hobby"}}
 ```
 
 Exit code is `0` on success, `1` on 401.
@@ -62,13 +62,13 @@ If `voiceai` is not on PATH (or you're on an older CLI), fall back to raw curl a
 ```bash
 curl -sS -o /dev/null -w "%{http_code}\n" \
   -H "Authorization: Bearer $VOICEAI_API_KEY" \
-  https://api.agents.slng.ai/v1/agents
+  https://api.slng.ai/v1/me
 ```
 
 - `200` — key is good.
 - `401` — key is invalid. Ask the user to re-check and paste again. Allow one retry, then stop.
 
-Override the base URL for staging with `VOICEAI_AGENTS_BASE_URL` (CLI) or by editing the curl host.
+Override the base URL for staging with `VOICEAI_BASE_URL` (CLI) or by editing the curl host.
 
 ### 4. Persist the key
 
@@ -115,8 +115,8 @@ Useful when reconfiguring against a different workspace or before uninstalling �
 | Variable | Purpose | Required |
 |----------|---------|----------|
 | `VOICEAI_API_KEY` | Bearer token sent as `Authorization: Bearer <key>` | Yes |
-| `VOICEAI_BASE_URL` | Override the unified TTS/STT base URL (default `https://api.slng.ai`) | No |
-| `VOICEAI_AGENTS_BASE_URL` | Override the agents API base URL (default `https://api.agents.slng.ai`). Used by `voiceai whoami` and the agents skill | No |
+| `VOICEAI_BASE_URL` | Override the unified base URL (default `https://api.slng.ai`). Used by TTS/STT and by `voiceai whoami` (`/v1/me`) | No |
+| `VOICEAI_AGENTS_BASE_URL` | Override the agents API base URL (default `https://api.agents.slng.ai`). Used by the agents skill | No |
 
 ## Security
 

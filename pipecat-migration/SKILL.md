@@ -88,9 +88,9 @@ Check presence without printing the value:
 [ -n "$SLNG_API_KEY" ] && echo "SLNG_API_KEY is set" || echo "SLNG_API_KEY is NOT set"
 ```
 
-Validate the key with the agents endpoint or the `setup-api-key` skill's current recommended method.
-A `200` response means the key is usable; `401` means it is missing, malformed, revoked, or for the
-wrong workspace.
+Validate the key with `voiceai whoami` (`GET /v1/me`) or the `setup-api-key` skill's current
+recommended method. A `200` response means the key is usable; `401` means it is missing, malformed,
+revoked, or for the wrong workspace.
 
 Store the key using the project's discovered env convention. Many Pipecat projects load `.env` via
 `load_dotenv()`; others use shell env, deployment secrets, or container config. Confirm any local
