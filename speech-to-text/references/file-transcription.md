@@ -18,23 +18,22 @@ CLI prints the transcript to stdout; pipe to `jq` or a file as needed.
 
 ```python
 import os
-from pathlib import Path
-from voiceai_sdk import Slng
+from voiceai import VoiceAI
 
-client = Slng(api_key=os.environ["VOICEAI_API_KEY"])
+client = VoiceAI(api_key=os.environ["VOICEAI_API_KEY"])
 
-transcript = client.speech_to_text.create(
-    model_variant="slng/deepgram/nova:3-en",
-    audio=Path("audio.wav"),
-    language="en",        # optional
-    diarize=True,         # optional
-)
+with open("audio.wav", "rb") as f:
+    result = client.stt.transcribe(
+        model="slng/deepgram/nova:3-en",
+        audio=f,
+        language="en",        # optional
+        diarize=True,         # optional
+    )
 
-print(transcript.text)
+print(result.transcript)
+for word in result.words:
+    print(f"{word.start:5.2f}s  {word.word}")
 ```
-
-The response also carries a `words` array (per-word `start`/`end`/`word`/`confidence`, plus
-`speaker` when `diarize` is on) — see the raw JSON below.
 
 Plain `requests`:
 
@@ -56,9 +55,22 @@ print(data["transcript"])
 
 ## TypeScript
 
-The `voiceai-sdk` npm package exports a `Slng` client with methods generated per model (e.g.
-`client.nova3`); check the installed package's types for the exact call shape. Plain `fetch` is the
-stable path:
+```typescript
+import { VoiceAI } from "voiceai-sdk";
+import { createReadStream } from "fs";
+
+const client = new VoiceAI({ apiKey: process.env.VOICEAI_API_KEY! });
+
+const result = await client.stt.transcribe({
+  model: "slng/deepgram/nova:3-en",
+  audio: createReadStream("audio.wav"),
+  language: "en",
+});
+
+console.log(result.transcript);
+```
+
+Plain `fetch`:
 
 ```typescript
 import { readFileSync } from "fs";

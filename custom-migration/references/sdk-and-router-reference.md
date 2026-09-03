@@ -19,29 +19,27 @@ Prefer the project's existing sync/async style.
 
 ```python
 import os
-from pathlib import Path
-from voiceai_sdk import Slng
+from voiceai import Slng
 
 client = Slng(api_key=os.environ["SLNG_API_KEY"])
 
-transcript = client.speech_to_text.create(
-    model_variant="slng/deepgram/nova:3-en",
-    audio=Path("audio.wav"),
+result = client.stt.transcribe(
+    model="slng/deepgram/nova:3-en",
+    file=audio_file,
 )
 
-audio = client.text_to_speech.create(
-    model_variant="slng/deepgram/aura:2-en",
+audio = client.tts.generate(
+    model="slng/deepgram/aura:2-en",
     text=text,
     voice="aura-2-luna-en",
 )
 ```
 
-The result objects expose `transcript.text` and `audio.write_to_file(path)`. The import module is
-`voiceai_sdk` (underscore), not `voiceai`. For async projects:
+For async projects:
 
 ```python
 import os
-from voiceai_sdk import AsyncSlng
+from voiceai import AsyncSlng
 
 client = AsyncSlng(api_key=os.environ["SLNG_API_KEY"])
 ```
@@ -51,19 +49,27 @@ or adapter return shape so callers do not need to change.
 
 ## JavaScript/TypeScript STT/TTS
 
-For server-side Node/Bun projects, the `voiceai-sdk` npm package exports a `Slng` client:
+For server-side Node/Bun projects:
 
 ```ts
-import { Slng } from "voiceai-sdk";
+import Slng from "voiceai-sdk";
 
 const client = new Slng({ apiKey: process.env.SLNG_API_KEY });
+
+const transcript = await client.stt.transcribe({
+  model: "slng/deepgram/nova:3-en",
+  file: audioFile,
+});
+
+const audio = await client.tts.generate({
+  model: "slng/deepgram/aura:2-en",
+  text,
+  voice: "aura-2-luna-en",
+});
 ```
 
-The TS SDK's request methods are generated per model (e.g. `client.nova3`, `client.aura2Deepgram`)
-rather than a single `client.tts` / `client.stt` namespace, and its surface diverges from the Python
-client — check the installed package's types (`voiceai-sdk/models`) for the exact call shape, or use
-the HTTP endpoints directly against `https://api.slng.ai/v1/{tts,stt}/{provider}/{model}:{variant}`.
-Do not expose `SLNG_API_KEY` in browser bundles; route browser audio/text through a server-side endpoint.
+Use `StreamingClient` only when replacing an existing streaming STT/TTS seam. Do not expose
+`SLNG_API_KEY` in browser bundles; route browser audio/text through a server-side endpoint.
 
 ## Optional Context Router
 

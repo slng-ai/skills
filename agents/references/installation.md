@@ -27,9 +27,9 @@ pip install voiceai-sdk
 
 ```python
 import os
-from voiceai_sdk import Slng
+from voiceai import VoiceAI
 
-client = Slng(api_key=os.environ["VOICEAI_API_KEY"])
+client = VoiceAI(api_key=os.environ["VOICEAI_API_KEY"])
 
 agent = client.agents.create(
     name="Hello Agent",
@@ -79,9 +79,9 @@ npm install voiceai-sdk
 ```
 
 ```typescript
-import { Slng } from "voiceai-sdk";
+import { VoiceAI } from "voiceai-sdk";
 
-const client = new Slng({ apiKey: process.env.VOICEAI_API_KEY! });
+const client = new VoiceAI({ apiKey: process.env.VOICEAI_API_KEY! });
 
 const agent = await client.agents.create({
   name: "Hello Agent",
