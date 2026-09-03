@@ -108,9 +108,9 @@ rejects the model id, and report the substitution.
 | Model id | Provider | Notes |
 |----------|----------|-------|
 | `slng/deepgram/aura:2-en` | Deepgram | Default. Aura 2, pairs natively with Nova 3 STT |
-| `slng/rime/arcana:3-en` | Rime | Arcana v3, emotional prosody, low TTFB. No `speed` |
+| `slng/fish/tts:s2.1-pro` | Fish Audio | SLNG-hosted, high quality |
 | `cartesia/sonic:3` | Cartesia | Sonic 3, WebSocket streaming, voice cloning - existing Cartesia voice ids carry over |
-| `slng/elevenlabs/...` | ElevenLabs | Voice variety via the Unmute bridge |
+| `slng/inworld/max:1.5` | Inworld | SLNG-hosted TTS 1.5 Max |
 | `slng/sarvam/bulbul:v3-...` | Sarvam AI | Indian-language locales. No `speed` |
 
 ## Optional LLM - SLNG Context Router

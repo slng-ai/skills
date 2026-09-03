@@ -70,9 +70,12 @@ Unified endpoint shape: `POST /v1/stt/{provider}/{model}:{variant}` for files, `
 |----------|-----------|----------|
 | `slng/deepgram/nova:3-en` | English | Default. High accuracy, fast |
 | `slng/deepgram/nova:3-es` | Spanish | |
+| `slng/deepgram/nova:3-multi` | Auto-detect | Multi-language |
+| `slng/deepgram/nova:3-hi` · `-te` · `-kn` · `-mr` · `-id` | Indic + Indonesian | Language-specific Nova 3 |
 | `deepgram/nova:3-medical` | English (medical) | Healthcare terminology |
-| `deepgram/nova:2` | Multilingual | Previous gen, cheaper |
+| `slng/speechmatics/realtime:v2` | Multilingual | Real-time |
 | `sarvam/saaras:v3` | Indic languages | Hindi, Tamil, Telugu, etc. |
+| `gradium/stt:default` | Multilingual | |
 | `soniox/speech-ai:rt-v5` | Multilingual | Real-time, ultra-low latency |
 | `reson8/reson8stt:v1` | Multilingual | Real-time, telephony-tuned |
 

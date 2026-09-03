@@ -74,8 +74,10 @@ slng exposes TTS through a unified endpoint shape: `POST /v1/tts/{provider}/{mod
 | Model ID | Languages | Best for |
 |----------|-----------|----------|
 | `slng/deepgram/aura:2-en` | English | Default. Fast, expressive, wide voice catalog |
-| `slng/rime/arcana:3-en` | English | High emotional range |
+| `slng/fish/tts:s2.1-pro` | Multilingual | SLNG-hosted Fish Audio, high quality |
+| `slng/inworld/max:1.5` | Multilingual | SLNG-hosted Inworld TTS 1.5 Max |
 | `cartesia/sonic:3` | Multilingual | WebSocket streaming, ultra-low latency |
+| `cartesia/sonic:3.5` | Multilingual | Latest Sonic |
 | `sarvam/bulbul:v3` | Indic languages | Hindi, Tamil, Telugu, Marathi, Kannada |
 | `kugelaudio/kugel:2` | Multilingual | Studio quality |
 | `murf/murftts:falcon` | Multilingual | Realistic, brand-friendly voices |
