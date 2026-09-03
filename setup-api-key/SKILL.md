@@ -17,6 +17,11 @@ Configure `VOICEAI_API_KEY` so the CLI, SDKs, and direct REST calls can authenti
 
 ## Workflow
 
+> **Fastest path (CLI installed):** `voiceai login` prompts for the key, saves it to a credential
+> profile, and verifies it against `/v1/me` in one step (`--profile <name>` for a named profile,
+> `--no-verify` to skip the probe). Use it instead of steps 2–4 when the CLI is available and the key
+> can live in the CLI config. The manual steps below still apply for `.env` / shell-rc / CI setups.
+
 ### 1. Check if a key is already configured
 
 ```bash
