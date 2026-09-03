@@ -83,19 +83,8 @@ async def transcribe(path: str):
 asyncio.run(transcribe("audio.raw"))
 ```
 
-With the SDK:
-
-```python
-from voiceai import VoiceAI
-
-client = VoiceAI()
-async with client.stt.stream(model="slng/deepgram/nova:3-en", encoding="linear16", sample_rate=16000) as session:
-    async for chunk in iter_mic():
-        await session.send(chunk)
-    async for event in session.events():
-        if event.type == "final_transcript":
-            print(event.transcript)
-```
+> The published `voiceai-sdk` client (`Slng`) has no streaming method — its `speech_to_text.create`
+> is file-only. For live transcription use the raw WebSocket protocol shown above.
 
 ## TypeScript
 
@@ -125,23 +114,6 @@ ws.on("message", (raw) => {
     console.log("[final]", event.transcript);
   }
 });
-```
-
-With the SDK:
-
-```typescript
-import { VoiceAI } from "voiceai-sdk";
-
-const client = new VoiceAI();
-const session = await client.stt.stream({
-  model: "slng/deepgram/nova:3-en",
-  encoding: "linear16",
-  sampleRate: 16000,
-});
-
-session.on("final_transcript", (e) => console.log(e.transcript));
-for await (const chunk of mic()) session.send(chunk);
-await session.close();
 ```
 
 ## wscat

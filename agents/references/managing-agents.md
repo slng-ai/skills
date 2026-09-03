@@ -53,9 +53,9 @@ curl https://api.agents.slng.ai/v1/agents \
 ### Python
 
 ```python
-from voiceai import VoiceAI
+from voiceai_sdk import Slng
 
-client = VoiceAI()
+client = Slng()
 
 agent = client.agents.create(
     name="Patient Outreach",

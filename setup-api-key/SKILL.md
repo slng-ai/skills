@@ -35,7 +35,7 @@ If a key is set, validate it (see step 3) and stop. Do not prompt the user.
 
 Direct the user to the dashboard:
 
-> Open https://slng.ai/dashboard/api-keys, create a new key, and copy it now. The key is shown only once.
+> Open https://app.slng.ai/api-keys, create a new key, and copy it now. The key is shown only once.
 
 Ask the user to paste the key.
 

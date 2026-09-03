@@ -88,7 +88,7 @@ are SLNG-hosted; ids like `cartesia/sonic:3` route a provider through SLNG. The 
 examples, not the catalog. **Never declare a provider unsupported from these tables alone.** SLNG
 routes more providers than any static list shows. Confirm availability with the voiceai CLI when
 installed (`voiceai models --tts`, `voiceai models --stt`, `voiceai voices --model <id>`), or in the
-current SLNG docs model pages or the [dashboard](https://slng.ai/dashboard). A REST catalog endpoint
+current SLNG docs model pages or the [dashboard](https://app.slng.ai). A REST catalog endpoint
 is not available yet.
 
 When availability is still ambiguous, prefer a faithful attempt over a silent substitution: keep the

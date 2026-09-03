@@ -95,7 +95,7 @@ npm install voiceai-sdk
 Use the matching import probe:
 
 ```bash
-python -c "from voiceai import Slng, AsyncSlng; assert Slng and AsyncSlng"
+python -c "from voiceai_sdk import Slng, AsyncSlng; assert Slng and AsyncSlng"
 node -e "import('voiceai-sdk').then(m => { if (!m.default) process.exit(1) })"
 ```
 

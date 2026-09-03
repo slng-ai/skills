@@ -104,7 +104,7 @@ room URL from a mic-enabled client. For telephony transports, call the configure
 **Verify each stage independently**. STT can transcribe while TTS fails, or vice-versa. Confirm you
 see the user transcript in the logs *and* hear the spoken reply. If one stage fails at runtime, see
 the Troubleshooting table below and handle it as the subset case. Check first-token latency in
-the [slng dashboard](https://slng.ai/dashboard).
+the [slng dashboard](https://app.slng.ai).
 
 ## 5. Lint and Format
 

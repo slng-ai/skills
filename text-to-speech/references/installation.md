@@ -33,18 +33,17 @@ pip install voiceai-sdk
 
 ```python
 import os
-from voiceai import VoiceAI
+from voiceai_sdk import Slng
 
-client = VoiceAI(api_key=os.environ["VOICEAI_API_KEY"])
+client = Slng(api_key=os.environ["VOICEAI_API_KEY"])
 
-audio = client.tts.create(
-    model="slng/deepgram/aura:2-en",
+audio = client.text_to_speech.create(
+    model_variant="slng/deepgram/aura:2-en",
     text="Hello from Python!",
     voice="aura-2-luna-en",
 )
 
-with open("hello.wav", "wb") as f:
-    f.write(audio.read())
+audio.write_to_file("hello.wav")
 ```
 
 If you'd rather avoid the SDK, plain `requests` works:
@@ -65,21 +64,9 @@ open("hello.wav", "wb").write(r.content)
 npm install voiceai-sdk
 ```
 
-```typescript
-import { VoiceAI } from "voiceai-sdk";
-
-const client = new VoiceAI({ apiKey: process.env.VOICEAI_API_KEY! });
-
-const audio = await client.tts.create({
-  model: "slng/deepgram/aura:2-en",
-  text: "Hello from TypeScript!",
-  voice: "aura-2-luna-en",
-});
-
-await Bun.write("hello.wav", await audio.arrayBuffer());
-```
-
-With plain `fetch`:
+The `voiceai-sdk` npm package exports a `Slng` client, but its methods are generated per model
+(e.g. `client.aura2Deepgram`), so check the installed package's types for the exact call shape. The
+HTTP endpoint below is stable and simplest for one-shot synthesis:
 
 ```typescript
 const r = await fetch("https://api.slng.ai/v1/tts/slng/deepgram/aura:2", {

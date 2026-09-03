@@ -61,17 +61,8 @@ async def stream_tts(text: str, out_path: str):
 asyncio.run(stream_tts("Stream me line by line...", "out.mp3"))
 ```
 
-With the SDK:
-
-```python
-from voiceai import VoiceAI
-
-client = VoiceAI()
-with client.tts.stream(model="slng/deepgram/aura:2-en", text="...", voice="aura-2-luna-en") as stream, \
-     open("out.mp3", "wb") as f:
-    for chunk in stream:
-        f.write(chunk)
-```
+> The published `voiceai-sdk` client (`Slng`) has no streaming method — its `text_to_speech.create`
+> is one-shot. For streaming TTS use the raw WebSocket protocol shown above.
 
 ## TypeScript
 
@@ -102,23 +93,6 @@ ws.on("message", (data, isBinary) => {
   if (event.audio_base64) appendFileSync("out.mp3", Buffer.from(event.audio_base64, "base64"));
   if (event.is_final) ws.close();
 });
-```
-
-With the SDK:
-
-```typescript
-import { VoiceAI } from "voiceai-sdk";
-import { createWriteStream } from "fs";
-
-const client = new VoiceAI();
-const stream = await client.tts.stream({
-  model: "slng/deepgram/aura:2-en",
-  text: "...",
-  voice: "aura-2-luna-en",
-});
-const out = createWriteStream("out.mp3");
-for await (const chunk of stream) out.write(chunk);
-out.end();
 ```
 
 ## wscat

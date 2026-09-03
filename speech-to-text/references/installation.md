@@ -30,17 +30,17 @@ pip install voiceai-sdk
 
 ```python
 import os
-from voiceai import VoiceAI
+from pathlib import Path
+from voiceai_sdk import Slng
 
-client = VoiceAI(api_key=os.environ["VOICEAI_API_KEY"])
+client = Slng(api_key=os.environ["VOICEAI_API_KEY"])
 
-with open("audio.wav", "rb") as f:
-    result = client.stt.transcribe(
-        model="slng/deepgram/nova:3-en",
-        audio=f,
-    )
+transcript = client.speech_to_text.create(
+    model_variant="slng/deepgram/nova:3-en",
+    audio=Path("audio.wav"),
+)
 
-print(result.transcript)
+print(transcript.text)
 ```
 
 With plain `requests`:
@@ -62,21 +62,9 @@ print(r.json())
 npm install voiceai-sdk
 ```
 
-```typescript
-import { VoiceAI } from "voiceai-sdk";
-import { createReadStream } from "fs";
-
-const client = new VoiceAI({ apiKey: process.env.VOICEAI_API_KEY! });
-
-const result = await client.stt.transcribe({
-  model: "slng/deepgram/nova:3-en",
-  audio: createReadStream("audio.wav"),
-});
-
-console.log(result.transcript);
-```
-
-With plain `fetch`:
+The `voiceai-sdk` npm package exports a `Slng` client, but its methods are generated per model
+(e.g. `client.nova3`), so check the installed package's types for the exact call shape. The HTTP
+endpoint below is stable and simplest:
 
 ```typescript
 import { readFileSync } from "fs";

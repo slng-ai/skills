@@ -36,7 +36,7 @@ cp .env.example .env
 # edit .env and add your VOICEAI_API_KEY
 ```
 
-Get a key from the [SLNG dashboard](https://slng.ai/dashboard/api-keys). See the [`setup-api-key`](./setup-api-key) skill for the full flow.
+Get a key from the [SLNG dashboard](https://app.slng.ai/api-keys). See the [`setup-api-key`](./setup-api-key) skill for the full flow.
 
 ## Skills
 
