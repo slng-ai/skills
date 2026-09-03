@@ -97,7 +97,7 @@ Then `source ~/.zshrc` or open a new terminal.
 **voiceai CLI config** (third option, used only by the CLI):
 
 ```bash
-voiceai config set api_key "..."
+voiceai config set apiKey "slng_cu_..."
 ```
 
 Stored at `~/.config/voiceai/config.json`. Note: env vars override anything in this file.
