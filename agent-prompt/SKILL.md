@@ -156,7 +156,7 @@ For LLM webhook tools, use this JSON schema:
 
 For System webhook tools, use this JSON schema:
 
-IMPORTANT: System webhooks use a different structure than LLM webhooks. Triggers and arguments live inside a "system" object, not at the top level. System webhooks also require a "parameters" block that mirrors the system arguments. The "system.arguments" array defines how each parameter is populated by the worker (not by the LLM). Each argument has a "source" object with a "type" field that tells the worker where to pull the value from (e.g., "call_id", "transcript", "recording_url", "constant").
+IMPORTANT: System webhooks use a different structure than LLM webhooks. Triggers and arguments live inside a "system" object, not at the top level. System webhooks also require a "parameters" block that mirrors the system arguments. The "system.arguments" array defines how each parameter is populated by the worker (not by the LLM). Each argument has a "source" object with a "type" field that tells the worker where to pull the value from (e.g., "call_id", "transcript_messages", "call_end_reason", "constant").
 
 {
   "type": "webhook",
@@ -219,8 +219,10 @@ System webhook source types for the "source.type" field in each argument:
 "trigger_event" - the event that triggered this webhook
 "call_end_reason" - reason the call ended
 "transcript_messages" - the full call transcript as structured message data. This is a special type that requires additional configuration fields in the source object: "max_messages" (integer, e.g., 2000) and "max_chars" (integer, e.g., 200000). The argument type should be set to "transcript_messages" rather than "string". Example source: {"type": "transcript_messages", "max_messages": 2000, "max_chars": 200000}
+"transcript_text" - the full call transcript rendered as a single plain-text string. Set the argument type to "transcript_text" (not "string") to match. Use this when the receiving server wants the transcript as text rather than structured messages.
+"template" - a value assembled from a template that can interpolate other resolved values. The argument type must be "string". Use for composing a formatted string from multiple pieces rather than passing one raw value.
 
-Note: Common call data like recording URL, timestamps, and duration are not available as system argument source types. If these values are needed in a webhook payload, coordinate with the platform team to confirm whether they can be added, or have the receiving server derive them from the call_id.
+Note: Common call data like recording URL, timestamps, and duration are not available as system argument source types — call recordings have been removed from the platform, so there is no recording URL to reference. If these values are needed in a webhook payload, have the receiving server derive them from the call_id.
 
 Example of a constant source: {"type": "constant", "value": "my_fixed_value"}
 
