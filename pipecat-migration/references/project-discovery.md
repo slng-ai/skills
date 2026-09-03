@@ -51,7 +51,7 @@ rg -n "load_dotenv|SLNG_API_KEY|VOICEAI_API_KEY|os\.environ|getenv|dotenv" .
 ```
 
 The SLNG Pipecat services take `api_key` explicitly; wire `os.getenv("SLNG_API_KEY")` at the call
-site. The SLNG LLM Router uses the same variable when SLNG LLM is selected. Some SLNG projects may
+site. The SLNG Context Router uses the same variable when SLNG LLM is selected. Some SLNG projects may
 already have `VOICEAI_API_KEY` for the CLI or REST skills. If `VOICEAI_API_KEY` is present and
 validated, configure `SLNG_API_KEY` to the same value for the Pipecat runtime instead of asking for
 a second key.
@@ -115,10 +115,10 @@ LLM: ... (will stay unchanged)
 Transport/VAD/aggregators: ... (will stay unchanged)
 ```
 
-If provisioned SLNG LLM Router was selected, report:
+If provisioned SLNG Context Router was selected, report:
 
 ```text
-LLM: ... (will migrate to SLNG LLM Router via Pipecat OpenAILLMService)
+LLM: ... (will migrate to SLNG Context Router via Pipecat OpenAILLMService)
 LLM router base URL: ...
 LLM router model: slng/auto
 Router org config: provisioned / not confirmed

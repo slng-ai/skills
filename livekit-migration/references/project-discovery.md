@@ -45,7 +45,7 @@ Search for dotenv and env references:
 rg -n "load_dotenv|SLNG_API_KEY|VOICEAI_API_KEY|os\.environ|getenv|dotenv" .
 ```
 
-The SLNG LiveKit plugin reads `SLNG_API_KEY` by default. The SLNG LLM Router uses the same variable
+The SLNG LiveKit plugin reads `SLNG_API_KEY` by default. The SLNG Context Router uses the same variable
 when SLNG LLM is selected. Some SLNG projects may already have `VOICEAI_API_KEY` for the CLI or REST
 skills. If `VOICEAI_API_KEY` is present and validated, configure `SLNG_API_KEY` to the same value for
 the LiveKit runtime instead of asking for a second key.
@@ -86,10 +86,10 @@ LLM: ... (will stay unchanged)
 VAD/turn detection: ... (will stay unchanged)
 ```
 
-If provisioned SLNG LLM Router was selected, report:
+If provisioned SLNG Context Router was selected, report:
 
 ```text
-LLM: ... (will migrate to SLNG LLM Router via LiveKit OpenAI-compatible plugin)
+LLM: ... (will migrate to SLNG Context Router via LiveKit OpenAI-compatible plugin)
 LLM router base URL: ...
 LLM router model: slng/auto
 Router org config: provisioned / not confirmed

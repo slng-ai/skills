@@ -1,6 +1,6 @@
 ---
 name: custom-migration
-description: Migrate a custom Python, JavaScript, or TypeScript voice project to SLNG hosted STT/TTS via voiceai-sdk, with optional SLNG LLM Router support through OpenAI-compatible client wiring. Use when the user asks to replace custom STT, TTS, or LLM providers with SLNG, integrate SLNG into a non-LiveKit project, use SLNG SDKs in an existing voice pipeline, or make an audit-friendly SLNG migration.
+description: Migrate a custom Python, JavaScript, or TypeScript voice project to SLNG hosted STT/TTS via voiceai-sdk, with optional SLNG Context Router support through OpenAI-compatible client wiring. Use when the user asks to replace custom STT, TTS, or LLM providers with SLNG, integrate SLNG into a non-LiveKit project, use SLNG SDKs in an existing voice pipeline, or make an audit-friendly SLNG migration.
 license: MIT
 compatibility: Requires an existing Python, JavaScript, or TypeScript project with clear STT, TTS, or LLM provider boundaries, internet access, and SLNG_API_KEY for runtime verification.
 ---
@@ -8,7 +8,7 @@ compatibility: Requires an existing Python, JavaScript, or TypeScript project wi
 # Migrate a Custom Voice Project to SLNG
 
 Move an existing custom project onto SLNG hosted models by replacing selected provider boundaries:
-STT and TTS use `voiceai-sdk`; LLM uses the provisioned SLNG OpenAI-compatible LLM Router only when
+STT and TTS use `voiceai-sdk`; LLM uses the provisioned SLNG OpenAI-compatible Context Router only when
 selected.
 
 This is not a framework rewrite. Preserve routing, prompts, tools, storage, transports, UI, queues,
@@ -21,7 +21,7 @@ clear provider seams, or add one small SLNG adapter module if that makes the dif
 Use these references only when needed:
 
 - [`references/project-discovery.md`](references/project-discovery.md) - language/runtime, package manager, env, and provider boundary discovery
-- [`references/sdk-and-router-reference.md`](references/sdk-and-router-reference.md) - Python/JS SDK and LLM Router wiring patterns
+- [`references/sdk-and-router-reference.md`](references/sdk-and-router-reference.md) - Python/JS SDK and Context Router wiring patterns
 - [`references/verification.md`](references/verification.md) - checks, live workflow verification, rollback, and troubleshooting
 - [`../setup-api-key`](../setup-api-key/SKILL.md) - obtain and validate an SLNG API key
 
@@ -116,7 +116,7 @@ Default to a faithful migration:
   when possible.
 - LLM: preserve the existing LLM unless SLNG LLM was selected; then point an OpenAI-compatible client
   at the selected regional SLNG router with `model="slng/auto"` and required
-  `X-SLNG-Agent-ID` / `X-SLNG-Session-ID` headers from stable project identifiers.
+  `X-Slng-Agent-Id` / `X-Slng-Session-Id` headers from stable project identifiers.
 - Add one small adapter module only when it makes the diff easier to review.
 - If a selected model or mode is unsupported, migrate the stages that work and leave the failing stage
   unchanged. Report the partial migration clearly.
@@ -130,9 +130,9 @@ Use `os.environ["SLNG_API_KEY"]` in Python and `process.env.SLNG_API_KEY` in ser
 For browser code, do not expose the key; route through an existing backend or stop and report that a
 server-side boundary is required.
 
-For LLM Router, use `slng/auto` as the only code-level model. Do not place provider/catalog model ids
-in customer code; those belong in SLNG org configuration. Add `X-SLNG-Agent-ID` and
-`X-SLNG-Session-ID` as headers using stable app identifiers. Do not generate random IDs per request.
+For Context Router, use `slng/auto` as the only code-level model. Do not place provider/catalog model ids
+in customer code; those belong in SLNG org configuration. Add `X-Slng-Agent-Id` and
+`X-Slng-Session-Id` as headers using stable app identifiers. Do not generate random IDs per request.
 
 Before inserting anything, check whether the project already has:
 
