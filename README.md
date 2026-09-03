@@ -49,7 +49,7 @@ Get a key from the [SLNG dashboard](https://slng.ai/dashboard/api-keys). See the
 | [`agents`](./agents) | Create, manage, and dispatch SLNG voice agents |
 | [`livekit-migration`](./livekit-migration) | Migrate an existing LiveKit Agents Python project to SLNG hosted STT/TTS |
 | [`pipecat-migration`](./pipecat-migration) | Migrate an existing Pipecat Python project to SLNG hosted STT/TTS |
-| [`custom-migration`](./custom-migration) | Migrate a custom Python/JS voice project to SLNG hosted STT/TTS and optional LLM Router |
+| [`custom-migration`](./custom-migration) | Migrate a custom Python/JS voice project to SLNG hosted STT/TTS and optional Context Router |
 
 ## Integration paths
 

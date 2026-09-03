@@ -1,11 +1,11 @@
 # SLNG LiveKit Pipeline Reference
 
 Models, voices, regions, and the exact wire-up for migrating a LiveKit agent's STT/TTS to the
-SLNG plugin, with optional SLNG LLM Router wiring. Treat this as a reference, not as the migration workflow. The workflow lives in
+SLNG plugin, with optional SLNG Context Router wiring. Treat this as a reference, not as the migration workflow. The workflow lives in
 [`../SKILL.md`](../SKILL.md).
 
 > `livekit-plugins-slng` exposes `slng.STT` and `slng.TTS` only. There is no `slng.LLM` and no
-> `Intelligence` class. If provisioned SLNG LLM Router was selected, use LiveKit's
+> `Intelligence` class. If provisioned SLNG Context Router was selected, use LiveKit's
 > OpenAI-compatible plugin.
 
 ## Install and import
@@ -79,13 +79,13 @@ current SLNG docs or dashboard when the mapping is not obvious from the project.
 | `soniox/tts-rt:v1` | Soniox | Real-time, 50+ languages |
 | `sarvam/bulbul:v3` | Sarvam AI | 11 Indian-language locales |
 
-## Optional LLM - SLNG LLM Router
+## Optional LLM - SLNG Context Router
 
-Only migrate the LLM when the user or generated stack explicitly selected SLNG LLM Router and SLNG
+Only migrate the LLM when the user or generated stack explicitly selected SLNG Context Router and SLNG
 has provisioned org/router configuration for the customer. Otherwise keep the project's existing LLM
 unchanged.
 
-The SLNG LLM Router is OpenAI-compatible at `/v1/chat/completions`, so use LiveKit's OpenAI plugin
+The SLNG Context Router is OpenAI-compatible at `/v1/chat/completions`, so use LiveKit's OpenAI plugin
 with a custom `base_url`. Do not add `slng.LLM`.
 
 ```python
@@ -95,10 +95,10 @@ from livekit.plugins import openai
 llm = openai.LLM(
     model="slng/auto",
     api_key=os.environ["SLNG_API_KEY"],
-    base_url="https://us.llm-router.slng.ai/v1",
+    base_url="https://us.context-router.slng.ai/v1",
     extra_headers={
-        "X-SLNG-Agent-ID": agent_id,
-        "X-SLNG-Session-ID": session_id,
+        "X-Slng-Agent-Id": agent_id,
+        "X-Slng-Session-Id": session_id,
     },
 )
 ```
@@ -111,10 +111,10 @@ Regional base URLs:
 
 | Selection | Router base URL |
 |-----------|-----------------|
-| India | `https://india.llm-router.slng.ai/v1` |
-| United States | `https://us.llm-router.slng.ai/v1` |
-| Europe | `https://eu.llm-router.slng.ai/v1` |
-| Indonesia | `https://indonesia.llm-router.slng.ai/v1` |
+| India | `https://india.context-router.slng.ai/v1` |
+| United States | `https://us.context-router.slng.ai/v1` |
+| Europe | `https://eu.context-router.slng.ai/v1` |
+| Indonesia | `https://indonesia.context-router.slng.ai/v1` |
 
 The public agent-facing model is `slng/auto`. Do not place provider/catalog model ids in customer
 code; SLNG configures provider models, customer provider API keys, routing policy, cache behavior,
@@ -144,7 +144,7 @@ In the standard `agent-starter-python` layout:
 
 - **STT and TTS** are often on `AgentSession(stt=..., tts=...)`. These are what SLNG replaces.
 - **LLM** is often on the `Agent` subclass (`Agent.__init__(llm=...)`). It stays unchanged unless
-  provisioned SLNG LLM Router was selected, in which case configure LiveKit's OpenAI-compatible LLM
+  provisioned SLNG Context Router was selected, in which case configure LiveKit's OpenAI-compatible LLM
   there.
 - **VAD** (`silero`), **turn detection** (`MultilingualModel`), and any **noise cancellation** plugin
   (e.g. `ai_coustics`) stay as they are unless the user opts to remove them.
@@ -177,7 +177,7 @@ tts=slng.TTS(model="cartesia/sonic:3", voice="9626c31c-bec5-4cca-baa8-f8ba9e84c8
 
 Add `region_override="eu-north-1"` (or your region) to either call for data residency.
 
-If provisioned SLNG LLM Router was selected, update the existing LLM constructor separately:
+If provisioned SLNG Context Router was selected, update the existing LLM constructor separately:
 
 ```python
 from livekit.plugins import openai
@@ -186,10 +186,10 @@ from livekit.plugins import openai
 llm=openai.LLM(
     model="slng/auto",
     api_key=os.environ["SLNG_API_KEY"],
-    base_url="https://eu.llm-router.slng.ai/v1",
+    base_url="https://eu.context-router.slng.ai/v1",
     extra_headers={
-        "X-SLNG-Agent-ID": agent_id,
-        "X-SLNG-Session-ID": session_id,
+        "X-Slng-Agent-Id": agent_id,
+        "X-Slng-Session-Id": session_id,
     },
 )
 ```

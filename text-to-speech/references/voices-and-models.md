@@ -11,14 +11,16 @@ voiceai models --tts
 voiceai voices --model slng/deepgram/aura:2-en
 ```
 
-> A REST/SDK catalog endpoint (`/v1/models`, `/v1/voices`) is not available yet. Until it ships, use
-> the CLI above or the snapshot below. If neither is possible, just attempt a short synthesis with
-> the candidate model/voice — the request itself is the availability check.
+> The `GET /v1/catalog/models` endpoint lists the full model catalog, but it has no
+> active/deployed filter — it can't tell you which models are actually callable in your region. So
+> the CLI above (`voiceai models` / `voiceai voices`) remains the authority for what's deployed.
+> There is no `/v1/voices` endpoint. If neither is possible, just attempt a short synthesis with the
+> candidate model/voice — the request itself is the availability check.
 
-## Deployed TTS models (snapshot, June 2026)
+## Deployed TTS models (illustrative — not the live list)
 
-`slng/`-prefixed ids are SLNG-hosted; the others route a provider through SLNG. Treat this table as
-a snapshot — the CLI is the live source.
+`slng/`-prefixed ids are SLNG-hosted; the others route a provider through SLNG. This table drifts —
+run `voiceai models --tts` for the live deployed set.
 
 | Model id | Provider | Notes |
 |----------|----------|-------|
@@ -47,11 +49,6 @@ a snapshot — the CLI is the live source.
 ### Deepgram Aura 2 — English masculine
 
 `aura-2-orion-en` (default), `aura-2-apollo-en`, `aura-2-arcas-en`, `aura-2-aries-en`, `aura-2-atlas-en`, `aura-2-draco-en`, `aura-2-hermes-en`, `aura-2-hyperion-en`, `aura-2-janus-en`, `aura-2-jupiter-en`, `aura-2-mars-en`, `aura-2-neptune-en`, `aura-2-odysseus-en`, `aura-2-orpheus-en`, `aura-2-pluto-en`, `aura-2-saturn-en`, `aura-2-zeus-en`.
-
-### Deepgram Aura 2 — Spanish
-
-Feminine: `aura-2-carina-es`, `aura-2-celeste-es`, `aura-2-diana-es`, `aura-2-estrella-es`, `aura-2-selena-es`.
-Masculine: `aura-2-sirio-es`, `aura-2-nestor-es`, `aura-2-alvaro-es`, `aura-2-aquila-es`, `aura-2-javier-es`.
 
 ### Other providers
 

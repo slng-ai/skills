@@ -1,11 +1,11 @@
 # SLNG Pipecat Pipeline Reference
 
 Service constructors, models, regions, and the exact wire-up for migrating a Pipecat bot's STT/TTS
-to the SLNG plugin, with optional SLNG LLM Router wiring. Treat this as a reference, not as the
+to the SLNG plugin, with optional SLNG Context Router wiring. Treat this as a reference, not as the
 migration workflow. The workflow lives in [`../SKILL.md`](../SKILL.md).
 
 > `pipecat-slng` exposes `SlngSTTService`, `SlngTTSService`, and `SlngHttpTTSService` only. There is
-> no `SlngLLMService`. If provisioned SLNG LLM Router was selected, use Pipecat's
+> no `SlngLLMService`. If provisioned SLNG Context Router was selected, use Pipecat's
 > `OpenAILLMService`.
 
 ## Install and import
@@ -113,13 +113,13 @@ rejects the model id, and report the substitution.
 | `slng/elevenlabs/...` | ElevenLabs | Voice variety via the Unmute bridge |
 | `slng/sarvam/bulbul:v3-...` | Sarvam AI | Indian-language locales. No `speed` |
 
-## Optional LLM - SLNG LLM Router
+## Optional LLM - SLNG Context Router
 
-Only migrate the LLM when the user or generated stack explicitly selected SLNG LLM Router and SLNG
+Only migrate the LLM when the user or generated stack explicitly selected SLNG Context Router and SLNG
 has provisioned org/router configuration for the customer. Otherwise keep the project's existing LLM
 unchanged.
 
-The SLNG LLM Router is OpenAI-compatible at `/v1/chat/completions`, so use Pipecat's
+The SLNG Context Router is OpenAI-compatible at `/v1/chat/completions`, so use Pipecat's
 `OpenAILLMService` with a custom `base_url`. Do not add an `SlngLLMService`.
 
 ```python
@@ -128,10 +128,10 @@ from pipecat.services.openai.llm import OpenAILLMService
 
 llm = OpenAILLMService(
     api_key=os.environ["SLNG_API_KEY"],
-    base_url="https://us.llm-router.slng.ai/v1",
+    base_url="https://us.context-router.slng.ai/v1",
     default_headers={
-        "X-SLNG-Agent-ID": agent_id,
-        "X-SLNG-Session-ID": session_id,
+        "X-Slng-Agent-Id": agent_id,
+        "X-Slng-Session-Id": session_id,
     },
     settings=OpenAILLMService.Settings(model="slng/auto"),
 )
@@ -149,10 +149,10 @@ Regional base URLs:
 
 | Selection | Router base URL |
 |-----------|-----------------|
-| India | `https://india.llm-router.slng.ai/v1` |
-| United States | `https://us.llm-router.slng.ai/v1` |
-| Europe | `https://eu.llm-router.slng.ai/v1` |
-| Indonesia | `https://indonesia.llm-router.slng.ai/v1` |
+| India | `https://india.context-router.slng.ai/v1` |
+| United States | `https://us.context-router.slng.ai/v1` |
+| Europe | `https://eu.context-router.slng.ai/v1` |
+| Indonesia | `https://indonesia.context-router.slng.ai/v1` |
 
 The public agent-facing model is `slng/auto`. Do not place provider/catalog model ids in customer
 code; SLNG configures provider models, customer provider API keys, routing policy, cache behavior,
@@ -180,7 +180,7 @@ In a typical Pipecat bot:
 - **STT and TTS** are constructed as services (`stt = ...`, `tts = ...`) and placed in
   `Pipeline([...])`. These are what SLNG replaces.
 - **LLM** is its own service in the same pipeline (`OpenAILLMService`, `AnthropicLLMService`, ...).
-  It stays unchanged unless provisioned SLNG LLM Router was selected, in which case configure
+  It stays unchanged unless provisioned SLNG Context Router was selected, in which case configure
   `OpenAILLMService` with the router base URL there.
 - **Transport** (`DailyTransport`, `SmallWebRTCTransport`, websocket/telephony), **VAD**
   (`SileroVADAnalyzer` on `LLMUserAggregatorParams` in 1.x, on `TransportParams` in older projects),
@@ -209,7 +209,7 @@ from pipecat_slng import SlngSTTService, SlngTTSService
 ```
 
 Replace only the service constructors (leave the `Pipeline([...])` list, transport, VAD, context
-aggregators, and the LLM as they are unless provisioned SLNG LLM Router was selected):
+aggregators, and the LLM as they are unless provisioned SLNG Context Router was selected):
 
 ```python
 stt = SlngSTTService(
@@ -229,17 +229,17 @@ with an Aura voice) only if the user asks or the model is confirmed unavailable.
 
 Add `region_override="eu-north-1"` (or your region) to either call for data residency.
 
-If provisioned SLNG LLM Router was selected, update the existing LLM constructor separately:
+If provisioned SLNG Context Router was selected, update the existing LLM constructor separately:
 
 ```python
 from pipecat.services.openai.llm import OpenAILLMService
 
 llm = OpenAILLMService(
     api_key=os.environ["SLNG_API_KEY"],
-    base_url="https://eu.llm-router.slng.ai/v1",
+    base_url="https://eu.context-router.slng.ai/v1",
     default_headers={
-        "X-SLNG-Agent-ID": agent_id,
-        "X-SLNG-Session-ID": session_id,
+        "X-Slng-Agent-Id": agent_id,
+        "X-Slng-Session-Id": session_id,
     },
     settings=OpenAILLMService.Settings(model="slng/auto"),
 )

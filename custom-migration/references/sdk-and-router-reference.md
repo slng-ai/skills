@@ -1,4 +1,4 @@
-# SLNG SDK and LLM Router Reference
+# SLNG SDK and Context Router Reference
 
 Use this reference for concrete wiring once project discovery has identified the language, runtime,
 and selected stages.
@@ -71,7 +71,7 @@ const audio = await client.tts.generate({
 Use `StreamingClient` only when replacing an existing streaming STT/TTS seam. Do not expose
 `SLNG_API_KEY` in browser bundles; route browser audio/text through a server-side endpoint.
 
-## Optional LLM Router
+## Optional Context Router
 
 Only migrate the LLM when selected and SLNG has provisioned org/router configuration for the customer.
 Prefer the project's existing OpenAI-compatible client if present. Otherwise add the standard OpenAI
@@ -81,10 +81,10 @@ Regional router base URLs:
 
 | Region | Base URL |
 |--------|----------|
-| Europe | `https://eu.llm-router.slng.ai/v1` |
-| United States | `https://us.llm-router.slng.ai/v1` |
-| India | `https://india.llm-router.slng.ai/v1` |
-| Indonesia | `https://indonesia.llm-router.slng.ai/v1` |
+| Europe | `https://eu.context-router.slng.ai/v1` |
+| United States | `https://us.context-router.slng.ai/v1` |
+| India | `https://india.context-router.slng.ai/v1` |
+| Indonesia | `https://indonesia.context-router.slng.ai/v1` |
 
 Python example:
 
@@ -94,10 +94,10 @@ from openai import OpenAI
 
 llm = OpenAI(
     api_key=os.environ["SLNG_API_KEY"],
-    base_url="https://us.llm-router.slng.ai/v1",
+    base_url="https://us.context-router.slng.ai/v1",
     default_headers={
-        "X-SLNG-Agent-ID": agent_id,
-        "X-SLNG-Session-ID": session_id,
+        "X-Slng-Agent-Id": agent_id,
+        "X-Slng-Session-Id": session_id,
     },
 )
 
@@ -114,10 +114,10 @@ import OpenAI from "openai";
 
 const llm = new OpenAI({
   apiKey: process.env.SLNG_API_KEY,
-  baseURL: "https://us.llm-router.slng.ai/v1",
+  baseURL: "https://us.context-router.slng.ai/v1",
   defaultHeaders: {
-    "X-SLNG-Agent-ID": agentId,
-    "X-SLNG-Session-ID": sessionId,
+    "X-Slng-Agent-Id": agentId,
+    "X-Slng-Session-Id": sessionId,
   },
 });
 

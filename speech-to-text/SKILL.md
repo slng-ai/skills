@@ -71,7 +71,6 @@ Unified endpoint shape: `POST /v1/stt/{provider}/{model}:{variant}` for files, `
 | `slng/deepgram/nova:3-en` | English | Default. High accuracy, fast |
 | `slng/deepgram/nova:3-es` | Spanish | |
 | `deepgram/nova:3-medical` | English (medical) | Healthcare terminology |
-| `slng/deepgram/nova:3-multi` | 30+ langs | Auto language detection |
 | `deepgram/nova:2` | Multilingual | Previous gen, cheaper |
 | `sarvam/saaras:v3` | Indic languages | Hindi, Tamil, Telugu, etc. |
 | `soniox/speech-ai:rt-v4` | Multilingual | Real-time, ultra-low latency |
