@@ -63,7 +63,7 @@ current SLNG docs or dashboard when the mapping is not obvious from the project.
 |----------|----------|-------|
 | `slng/deepgram/nova:3-en` | Deepgram | SLNG-hosted Nova 3, lowest latency. `-multi` variant for auto language |
 | `deepgram/nova:2` | Deepgram | Nova 2, lower cost, 36 languages |
-| `soniox/speech-ai:rt-v4` | Soniox | Real-time, diarisation, 60+ languages |
+| `soniox/speech-ai:rt-v5` | Soniox | Real-time, diarisation, 60+ languages |
 | `reson8/reson8stt:v1` | Reson8 | 9 European locales, telephony-tuned |
 | `sarvam/saaras:v3` | Sarvam AI | Indian + European languages (24 locales) |
 

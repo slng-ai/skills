@@ -73,7 +73,7 @@ Unified endpoint shape: `POST /v1/stt/{provider}/{model}:{variant}` for files, `
 | `deepgram/nova:3-medical` | English (medical) | Healthcare terminology |
 | `deepgram/nova:2` | Multilingual | Previous gen, cheaper |
 | `sarvam/saaras:v3` | Indic languages | Hindi, Tamil, Telugu, etc. |
-| `soniox/speech-ai:rt-v4` | Multilingual | Real-time, ultra-low latency |
+| `soniox/speech-ai:rt-v5` | Multilingual | Real-time, ultra-low latency |
 | `reson8/reson8stt:v1` | Multilingual | Real-time, telephony-tuned |
 
 List current deployments:
