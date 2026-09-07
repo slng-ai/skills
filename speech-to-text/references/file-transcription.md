@@ -9,7 +9,7 @@ Content type: `multipart/form-data` with field `audio`.
 
 ```bash
 voiceai stt audio.wav --model slng/deepgram/nova:3-en
-voiceai stt long.mp3  --model slng/deepgram/nova:3-multi
+voiceai stt long.mp3  --model slng/deepgram/nova:3-es
 ```
 
 CLI prints the transcript to stdout; pipe to `jq` or a file as needed.

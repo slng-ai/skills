@@ -1,6 +1,6 @@
 ---
 name: pipecat-migration
-description: Migrate an existing Pipecat Python project to SLNG hosted speech infrastructure for STT/TTS via pipecat-slng, with optional SLNG LLM Router support through Pipecat's OpenAI-compatible service. Use when the user asks to "move my Pipecat bot to slng", "use slng for STT/TTS in Pipecat", "swap Deepgram/Cartesia for slng in pipecat", "add the slng pipecat plugin", "use SLNG LLM router in Pipecat", or "migrate pipecat to slng".
+description: Migrate an existing Pipecat Python project to SLNG hosted speech infrastructure for STT/TTS via pipecat-slng, with optional SLNG Context Router support through Pipecat's OpenAI-compatible service. Use when the user asks to "move my Pipecat bot to slng", "use slng for STT/TTS in Pipecat", "swap Deepgram/Cartesia for slng in pipecat", "add the slng pipecat plugin", "use SLNG LLM router in Pipecat", or "migrate pipecat to slng".
 license: MIT
 compatibility: Requires a Pipecat (pipecat-ai >= 1.3.0) Python 3.11+ project, internet access, and a SLNG_API_KEY for runtime verification. Works with uv, Poetry, pip, or other Python dependency managers when detected.
 ---
@@ -10,13 +10,13 @@ compatibility: Requires a Pipecat (pipecat-ai >= 1.3.0) Python 3.11+ project, in
 Move an existing Pipecat Python project onto SLNG hosted speech infrastructure by replacing the
 speech-to-text and text-to-speech services with `SlngSTTService` and `SlngTTSService` from
 `pipecat-slng`. If the user explicitly selected SLNG LLM and SLNG has provisioned the customer's
-org/router configuration, point the project's LLM at the SLNG OpenAI-compatible LLM Router through
+org/router configuration, point the project's LLM at the SLNG OpenAI-compatible Context Router through
 Pipecat's `OpenAILLMService`.
 
 This is a pipeline migration, not a bot rewrite. Preserve the transport (Daily, SmallWebRTC,
 Twilio/telephony, FastAPI WebSocket), VAD, turn-taking, context aggregators, prompts, tools, and
 business logic. Preserve the user's current LLM unless the user or generated stack explicitly asks
-for provisioned SLNG LLM Router.
+for provisioned SLNG Context Router.
 
 > Scope: `pipecat-slng` exposes `SlngSTTService`, `SlngTTSService`, and `SlngHttpTTSService`. It
 > does not provide an LLM service. If SLNG LLM is selected, use Pipecat's `OpenAILLMService` with a
@@ -60,7 +60,7 @@ Before editing, inspect enough local context to identify:
 - Existing tests and quality commands, if any.
 
 Report the discovered STT, TTS, and LLM providers before changing anything, including whether the LLM
-will stay unchanged or move to the provisioned SLNG LLM Router. Use
+will stay unchanged or move to the provisioned SLNG Context Router. Use
 [`references/project-discovery.md`](references/project-discovery.md) for command examples.
 
 ## 2. Establish a Rollback Point
@@ -78,7 +78,7 @@ without automatic rollback. Do not run `git init` without user confirmation.
 
 ## 3. Validate Credentials Without Exposing Them
 
-The SLNG Pipecat plugin and the SLNG LLM Router both use `SLNG_API_KEY`. If the project already has
+The SLNG Pipecat plugin and the SLNG Context Router both use `SLNG_API_KEY`. If the project already has
 `VOICEAI_API_KEY` and `SLNG_API_KEY` is missing, treat `VOICEAI_API_KEY` as the same SLNG credential
 only after validation, then configure `SLNG_API_KEY` for the Pipecat runtime.
 
@@ -151,8 +151,8 @@ Default to a faithful migration:
 - Leave the LLM, transport, VAD, context aggregators, and other Pipecat processors unchanged unless
   SLNG LLM was selected.
 - If SLNG LLM was selected, replace only the LLM constructor with Pipecat's `OpenAILLMService`
-  pointed at the selected regional SLNG LLM Router base URL, `model="slng/auto"`, and required
-  `X-SLNG-Agent-ID` / `X-SLNG-Session-ID` headers from stable project identifiers.
+  pointed at the selected regional SLNG Context Router base URL, `model="slng/auto"`, and required
+  `X-Slng-Agent-Id` / `X-Slng-Session-Id` headers from stable project identifiers.
 - Use automatic region selection unless the user needs a pinned region for latency or residency
   (`region_override`, or `world_part_override` for a coarser zone).
 
@@ -181,9 +181,9 @@ selected, replace only the current LLM constructor with Pipecat's OpenAI-compati
 configuration. Preserve the rest of the pipeline, transport, and bot configuration.
 
 Do not inline secrets. Pass `api_key=os.getenv("SLNG_API_KEY")`, never a literal. Use the same env
-var for the LLM Router. For LLM Router, use the `slng/auto` model (via
+var for the Context Router. For Context Router, use the `slng/auto` model (via
 `settings=OpenAILLMService.Settings(model="slng/auto")` in current Pipecat) and add
-`X-SLNG-Agent-ID` and `X-SLNG-Session-ID` as `default_headers` using stable identifiers already
+`X-Slng-Agent-Id` and `X-Slng-Session-Id` as `default_headers` using stable identifiers already
 present in the bot/session context. Do not generate random IDs per request, and do not expose provider/catalog model ids in
 code.
 

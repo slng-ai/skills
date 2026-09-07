@@ -18,7 +18,7 @@ npm install -g voiceai-cli
 Then:
 
 ```bash
-export VOICEAI_API_KEY="..."        # or use `voiceai config set api_key ...`
+export VOICEAI_API_KEY="..."        # or use `voiceai config set apiKey ...`
 voiceai tts "hello"                  # plays + saves to $TMPDIR/voiceai-tts/
 voiceai tts "save me" --out hi.mp3   # save to a specific path
 ```

@@ -25,16 +25,16 @@ git diff | grep -nE 'api_key|SLNG_API_KEY'
 
 Acceptable matches are references such as `SLNG_API_KEY`, `os.getenv("SLNG_API_KEY")`, or docs telling
 the user to set the variable. If any line contains a quoted key value, remove it and rotate the key.
-When SLNG LLM is selected, the LLM Router must also read `SLNG_API_KEY`; do not introduce a separate
+When SLNG LLM is selected, the Context Router must also read `SLNG_API_KEY`; do not introduce a separate
 literal key.
 
 ## 3. Unit Test
 
 Prefer a test that imports the project's own service factory or bot builder and asserts the
-configured STT and TTS are `SlngSTTService` and `SlngTTSService`. If provisioned SLNG LLM Router was
+configured STT and TTS are `SlngSTTService` and `SlngTTSService`. If provisioned SLNG Context Router was
 selected, assert the LLM is Pipecat's `OpenAILLMService` configured with the selected regional
-`base_url`, `model="slng/auto"`, environment-backed API key, and required `X-SLNG-Agent-ID` /
-`X-SLNG-Session-ID` headers. This catches future edits to the actual bot.
+`base_url`, `model="slng/auto"`, environment-backed API key, and required `X-Slng-Agent-Id` /
+`X-Slng-Session-Id` headers. This catches future edits to the actual bot.
 
 If the project has no factory, add one only when it keeps the edit small and makes the pipeline easier
 to test. Do not refactor unrelated business logic just to add a test.
@@ -104,7 +104,7 @@ room URL from a mic-enabled client. For telephony transports, call the configure
 **Verify each stage independently**. STT can transcribe while TTS fails, or vice-versa. Confirm you
 see the user transcript in the logs *and* hear the spoken reply. If one stage fails at runtime, see
 the Troubleshooting table below and handle it as the subset case. Check first-token latency in
-the [slng dashboard](https://slng.ai/dashboard).
+the [slng dashboard](https://app.slng.ai).
 
 ## 5. Lint and Format
 
@@ -124,7 +124,7 @@ uv run ruff check
 - [ ] The LLM was left on its current provider, unless SLNG LLM was selected.
 - [ ] If SLNG LLM was selected, SLNG org/router configuration is provisioned.
 - [ ] If SLNG LLM was selected, the LLM uses Pipecat's `OpenAILLMService`, the selected regional
-      LLM Router base URL, `model="slng/auto"`, required `X-SLNG-Agent-ID` / `X-SLNG-Session-ID`
+      Context Router base URL, `model="slng/auto"`, required `X-Slng-Agent-Id` / `X-Slng-Session-Id`
       headers, and no `SlngLLMService` reference.
 - [ ] No API key literal appears in the diff.
 - [ ] Project tests pass, including any STT/TTS assertions added for this migration.

@@ -1,6 +1,6 @@
 ---
 name: livekit-migration
-description: Migrate an existing LiveKit Agents Python project to SLNG hosted speech infrastructure for STT/TTS via livekit-plugins-slng, with optional SLNG LLM Router support through LiveKit's OpenAI-compatible plugin. Use when the user asks to "move my LiveKit agent to slng", "use slng for STT/TTS in LiveKit", "swap Deepgram/Cartesia for slng", "add the slng livekit plugin", "use SLNG LLM router in LiveKit", or "migrate livekit to slng".
+description: Migrate an existing LiveKit Agents Python project to SLNG hosted speech infrastructure for STT/TTS via livekit-plugins-slng, with optional SLNG Context Router support through LiveKit's OpenAI-compatible plugin. Use when the user asks to "move my LiveKit agent to slng", "use slng for STT/TTS in LiveKit", "swap Deepgram/Cartesia for slng", "add the slng livekit plugin", "use SLNG LLM router in LiveKit", or "migrate livekit to slng".
 license: MIT
 compatibility: Requires a LiveKit Agents Python project, internet access, and a SLNG_API_KEY for runtime verification. Works with uv, Poetry, pip, or other Python dependency managers when detected.
 ---
@@ -15,7 +15,7 @@ Router through LiveKit's OpenAI plugin.
 
 This is a pipeline migration, not an agent rewrite. Preserve prompts, tools, VAD, turn detection,
 room wiring, dispatch behavior, and business logic. Preserve the user's current LLM unless the user
-or generated stack explicitly asks for provisioned SLNG LLM Router.
+or generated stack explicitly asks for provisioned SLNG Context Router.
 
 > Scope: `livekit-plugins-slng` exposes `slng.STT` and `slng.TTS`. It does not provide an LLM class.
 > If SLNG LLM is selected, use LiveKit's OpenAI-compatible LLM support with a custom `base_url`.
@@ -57,7 +57,7 @@ Before editing, inspect enough local context to identify:
 - Existing tests and quality commands, if any.
 
 Report the discovered STT, TTS, and LLM providers before changing anything, including whether the LLM
-will stay unchanged or move to the provisioned SLNG LLM Router. Use
+will stay unchanged or move to the provisioned SLNG Context Router. Use
 [`references/project-discovery.md`](references/project-discovery.md) for command examples.
 
 ## 2. Establish a Rollback Point
@@ -75,7 +75,7 @@ without automatic rollback. Do not run `git init` without user confirmation.
 
 ## 3. Validate Credentials Without Exposing Them
 
-The SLNG LiveKit plugin and the SLNG LLM Router both use `SLNG_API_KEY`. If the project already has
+The SLNG LiveKit plugin and the SLNG Context Router both use `SLNG_API_KEY`. If the project already has
 `VOICEAI_API_KEY` and `SLNG_API_KEY` is missing, treat `VOICEAI_API_KEY` as the same SLNG credential
 only after validation, then configure `SLNG_API_KEY` for the LiveKit runtime.
 
@@ -140,8 +140,8 @@ Default to a faithful migration:
 - Keep the current language and sample-rate choices unless SLNG requires a different representation.
 - Leave the LLM and non-speech LiveKit components unchanged unless SLNG LLM was selected.
 - If SLNG LLM was selected, replace only the LLM constructor with LiveKit's OpenAI-compatible LLM
-  pointed at the selected regional SLNG LLM Router base URL, `model="slng/auto"`, and required
-  `X-SLNG-Agent-ID` / `X-SLNG-Session-ID` headers from stable project identifiers.
+  pointed at the selected regional SLNG Context Router base URL, `model="slng/auto"`, and required
+  `X-Slng-Agent-Id` / `X-Slng-Session-Id` headers from stable project identifiers.
 - Use automatic region selection unless the user needs a pinned region for latency or residency.
 
 Ask the user only when the current project does not contain enough information to choose safely. If a
@@ -162,8 +162,8 @@ Preserve the rest of the session and agent configuration.
 
 Do not inline secrets. Usually no explicit `api_key` argument is needed because the plugin reads
 `SLNG_API_KEY`. If the call site must be explicit, use `os.environ["SLNG_API_KEY"]`, never a literal.
-Use the same env var for the LLM Router. For LLM Router, use `model="slng/auto"` and add
-`X-SLNG-Agent-ID` and `X-SLNG-Session-ID` as headers using stable identifiers already present in the
+Use the same env var for the Context Router. For Context Router, use `model="slng/auto"` and add
+`X-Slng-Agent-Id` and `X-Slng-Session-Id` as headers using stable identifiers already present in the
 agent/session/room context. Do not generate random IDs per request, and do not expose provider/catalog
 model ids in code.
 

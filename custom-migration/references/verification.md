@@ -29,7 +29,7 @@ Prefer updating existing provider tests over adding disconnected tests. Good foc
 - STT adapter calls `voiceai-sdk` with the selected model and preserves transcript shape.
 - TTS adapter calls `voiceai-sdk` with selected model/voice and preserves audio return shape.
 - LLM adapter uses the selected router base URL, `model="slng/auto"`, `SLNG_API_KEY`, and required
-  `X-SLNG-Agent-ID` / `X-SLNG-Session-ID` headers.
+  `X-Slng-Agent-Id` / `X-Slng-Session-Id` headers.
 - Streaming adapters preserve partial/final transcript or audio chunk event contracts.
 
 Use mocks for SDK calls unless the project already has integration-test infrastructure. Do not assert
@@ -67,9 +67,9 @@ keep working SLNG stages, and report the partial migration.
 - [ ] Clean rollback point was established before edits.
 - [ ] `voiceai-sdk` imports successfully when STT/TTS are selected.
 - [ ] OpenAI-compatible client imports successfully when SLNG LLM is selected.
-- [ ] SLNG org/router configuration is provisioned before LLM Router migration is verified.
+- [ ] SLNG org/router configuration is provisioned before Context Router migration is verified.
 - [ ] Selected stages use `SLNG_API_KEY` without literal key values.
-- [ ] LLM Router uses `slng/auto` and stable agent/session headers, with no provider/catalog model ids
+- [ ] Context Router uses `slng/auto` and stable agent/session headers, with no provider/catalog model ids
       in customer code.
 - [ ] No fake framework wrappers were added.
 - [ ] The diff is limited to dependency files, env docs/config, one adapter seam, provider call sites,

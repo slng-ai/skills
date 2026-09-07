@@ -1,6 +1,6 @@
 ---
 name: agents
-description: Create, manage, and dispatch slng.ai voice agents. Use when the user wants to create a voice agent, list or update existing agents, dispatch an outbound phone call from an agent, start a web (browser) voice session, or work with the slng Agent Infra / Voice Agents API.
+description: Create, manage, and dispatch slng.ai voice agents. Use when the user wants to create a voice agent, list or update existing agents, manage agent versions, dispatch an outbound phone call from an agent, start a web (browser) voice session, or inspect the org-level resources agents use — the shared Tools library, MCP servers, Vault secrets, client models, or SIP trunks — or work with the slng Agent Infra / Voice Agents API.
 license: MIT
 compatibility: Requires internet access and a slng.ai API key (VOICEAI_API_KEY).
 ---
@@ -116,11 +116,23 @@ await fetch(`${BASE}/agents/${agent.id}/calls`, {
 | `PUT` | `/v1/agents/{id}` | Replace agent |
 | `DELETE` | `/v1/agents/{id}` | Delete agent |
 | `POST` | `/v1/agents/{id}/duplicate` | Duplicate agent |
+| `POST` | `/v1/agents/import` | Create an agent from a config document |
+| `GET` | `/v1/agents/{id}/config` | Download an agent's config JSON |
+| `GET` | `/v1/agents/{id}/versions` | List an agent's saved versions |
+| `GET` | `/v1/agents/{id}/versions/{n}` | Get one version (add `/config` to download it) |
+| `POST` | `/v1/agents/{id}/versions/{n}/restore/preview` · `/restore/accept` | Preview then restore a version |
+| `GET` | `/v1/agents/{id}/sip-trunk-options` | List SIP trunk options available to the agent |
 | `POST` | `/v1/agents/{id}/calls` | Dispatch outbound call |
 | `GET` | `/v1/agents/{id}/calls` | List calls for agent |
 | `GET` | `/v1/agents/{id}/calls/{call_id}` | Get specific call |
+| `GET` | `/v1/agents/{id}/calls/export` | Export an agent's calls as CSV |
 | `POST` | `/v1/agents/{id}/web-sessions` | Create browser voice session |
 | `POST` | `/v1/agents/{id}/calls/{call_id}/tool-executions` | Append a tool execution record to a call (used by SLNG-managed runtimes) |
+
+Org-level resources agents draw on — the shared **Tools** library, **MCP servers**, the **Vault**
+(secrets), **client models**, and **SIP trunks** — live under `/v1/agents/tools`,
+`/v1/agents/mcp-servers`, `/v1/agents/secrets`, `/v1/agents/client-models`. See
+[`references/org-resources.md`](references/org-resources.md).
 
 See [`references/managing-agents.md`](references/managing-agents.md) and [`references/calls-and-sessions.md`](references/calls-and-sessions.md) for full examples in all four paths.
 

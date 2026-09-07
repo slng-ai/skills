@@ -74,11 +74,10 @@ slng exposes TTS through a unified endpoint shape: `POST /v1/tts/{provider}/{mod
 | Model ID | Languages | Best for |
 |----------|-----------|----------|
 | `slng/deepgram/aura:2-en` | English | Default. Fast, expressive, wide voice catalog |
-| `slng/deepgram/aura:2-es` | Spanish | Spanish voices |
-| `slng/rime/arcana:3-en` | English | High emotional range |
-| `slng/rime/arcana:3-hi` | Hindi | Native Hindi voices |
-| `slng/rime/arcana:3-es` | Spanish | Spanish (alt to Aura) |
+| `slng/fish/tts:s2.1-pro` | Multilingual | SLNG-hosted Fish Audio, high quality |
+| `slng/inworld/max:1.5` | Multilingual | SLNG-hosted Inworld TTS 1.5 Max |
 | `cartesia/sonic:3` | Multilingual | WebSocket streaming, ultra-low latency |
+| `cartesia/sonic:3.5` | Multilingual | Latest Sonic |
 | `sarvam/bulbul:v3` | Indic languages | Hindi, Tamil, Telugu, Marathi, Kannada |
 | `kugelaudio/kugel:2` | Multilingual | Studio quality |
 | `murf/murftts:falcon` | Multilingual | Realistic, brand-friendly voices |
@@ -105,8 +104,6 @@ Recommended defaults:
 
 - English feminine: `aura-2-luna-en` (warm), `aura-2-thalia-en` (clear)
 - English masculine: `aura-2-orion-en`
-- Spanish feminine: `aura-2-carina-es`
-- Spanish masculine: `aura-2-sirio-es`
 
 ## Streaming
 

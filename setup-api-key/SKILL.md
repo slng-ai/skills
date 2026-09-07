@@ -17,6 +17,11 @@ Configure `VOICEAI_API_KEY` so the CLI, SDKs, and direct REST calls can authenti
 
 ## Workflow
 
+> **Fastest path (CLI installed):** `voiceai login` prompts for the key, saves it to a credential
+> profile, and verifies it against `/v1/me` in one step (`--profile <name>` for a named profile,
+> `--no-verify` to skip the probe). Use it instead of steps 2–4 when the CLI is available and the key
+> can live in the CLI config. The manual steps below still apply for `.env` / shell-rc / CI setups.
+
 ### 1. Check if a key is already configured
 
 ```bash
@@ -35,7 +40,7 @@ If a key is set, validate it (see step 3) and stop. Do not prompt the user.
 
 Direct the user to the dashboard:
 
-> Open https://slng.ai/dashboard/api-keys, create a new key, and copy it now. The key is shown only once.
+> Open https://app.slng.ai/api-keys, create a new key, and copy it now. The key is shown only once.
 
 Ask the user to paste the key.
 
@@ -97,7 +102,7 @@ Then `source ~/.zshrc` or open a new terminal.
 **voiceai CLI config** (third option, used only by the CLI):
 
 ```bash
-voiceai config set api_key "..."
+voiceai config set apiKey "slng_cu_..."
 ```
 
 Stored at `~/.config/voiceai/config.json`. Note: env vars override anything in this file.
