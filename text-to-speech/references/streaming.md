@@ -112,12 +112,12 @@ const streaming = new StreamingClient({
   projectId: process.env.SLNG_PROJECT_ID,
 });
 const session = await streaming.connectTts("slng/deepgram/aura:2-en");
-session.send({ type: "init", model: "aura-2-luna-en", config: { sample_rate: 24000, encoding: "linear16" } });
+session.send({ type: "init", voice: "aura-2-luna-en", config: { sample_rate: 24000, encoding: "linear16" } });
 session.send({ type: "text", text: "...", flush: true });
 
 const out = createWriteStream("out.pcm");
 for await (const msg of session) {
-  if (msg.type === "binary") out.write(msg.bytes);
+  if (msg.type === "binary" && "bytes" in msg) out.write(msg.bytes);
   if (msg.type === "audio_end") break;
 }
 out.end();

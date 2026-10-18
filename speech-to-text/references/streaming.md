@@ -140,7 +140,7 @@ session.send({ type: "init", config: { language: "en", sample_rate: 16000, encod
 })();
 
 for await (const msg of session) {
-  if (msg.type === "final_transcript") console.log(msg.transcript);
+  if (msg.type === "final_transcript" && "transcript" in msg) console.log(msg.transcript);
 }
 ```
 
