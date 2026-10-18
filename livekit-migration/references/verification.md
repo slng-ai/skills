@@ -43,6 +43,8 @@ Fallback test for projects where the pipeline cannot be imported cleanly:
 
 ```python
 # tests/test_slng_pipeline.py
+import os
+
 import pytest
 from livekit.plugins import slng
 
@@ -51,15 +53,20 @@ from livekit.plugins import slng
 def _fake_key(monkeypatch):
     # The plugin reads SLNG_API_KEY; a dummy value is fine for a config assertion.
     monkeypatch.setenv("SLNG_API_KEY", "test-key")
+    monkeypatch.setenv("SLNG_PROJECT_ID", "00000000-0000-4000-8000-000000000000")
 
 
 def test_stt_is_slng_nova_3():
-    stt = slng.STT(model="deepgram/nova:3", language="en")
+    stt = slng.STT(model="deepgram/nova:3", language="en", project_id=os.environ["SLNG_PROJECT_ID"])
     assert isinstance(stt, slng.STT)
 
 
 def test_tts_is_slng_sonic_3():
-    tts = slng.TTS(model="cartesia/sonic:3", voice="9626c31c-bec5-4cca-baa8-f8ba9e84c8bc")
+    tts = slng.TTS(
+        model="cartesia/sonic:3",
+        voice="9626c31c-bec5-4cca-baa8-f8ba9e84c8bc",
+        project_id=os.environ["SLNG_PROJECT_ID"],
+    )
     assert isinstance(tts, slng.TTS)
 ```
 

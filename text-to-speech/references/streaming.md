@@ -44,7 +44,7 @@ async def stream_tts(text: str, out_path: str):
         "Authorization": f"Bearer {os.environ['VOICEAI_API_KEY']}",
         "X-SLNG-Project-Id": os.environ["SLNG_PROJECT_ID"],
     }
-    async with websockets.connect(URL, extra_headers=headers) as ws:
+    async with websockets.connect(URL, additional_headers=headers) as ws:
         await ws.send(json.dumps({
             "type": "synthesize",
             "text": text,
@@ -64,18 +64,7 @@ async def stream_tts(text: str, out_path: str):
 asyncio.run(stream_tts("Stream me line by line...", "out.mp3"))
 ```
 
-With the SDK:
-
-```python
-import os
-from voiceai import VoiceAI
-
-client = VoiceAI(default_headers={"X-SLNG-Project-Id": os.environ["SLNG_PROJECT_ID"]})
-with client.tts.stream(model="slng/deepgram/aura:2-en", text="...", voice="aura-2-luna-en") as stream, \
-     open("out.mp3", "wb") as f:
-    for chunk in stream:
-        f.write(chunk)
-```
+The Python SDK has no WebSocket client yet. Use the `websockets` example above.
 
 ## TypeScript
 
@@ -114,19 +103,23 @@ ws.on("message", (data, isBinary) => {
 With the SDK:
 
 ```typescript
-import { VoiceAI } from "voiceai-sdk";
+import { StreamingClient } from "voiceai-sdk/streaming";
 import { createWriteStream } from "fs";
 
-const client = new VoiceAI({
-  defaultHeaders: { "X-SLNG-Project-Id": process.env.SLNG_PROJECT_ID! },
+// Uses the Unmute bridge (/v1/bridges/unmute/tts/...). projectId is sent as X-SLNG-Project-Id.
+const streaming = new StreamingClient({
+  apiKey: process.env.VOICEAI_API_KEY!,
+  projectId: process.env.SLNG_PROJECT_ID,
 });
-const stream = await client.tts.stream({
-  model: "slng/deepgram/aura:2-en",
-  text: "...",
-  voice: "aura-2-luna-en",
-});
-const out = createWriteStream("out.mp3");
-for await (const chunk of stream) out.write(chunk);
+const session = await streaming.connectTts("slng/deepgram/aura:2-en");
+session.send({ type: "init", model: "aura-2-luna-en", config: { sample_rate: 24000, encoding: "linear16" } });
+session.send({ type: "text", text: "...", flush: true });
+
+const out = createWriteStream("out.pcm");
+for await (const msg of session) {
+  if (msg.type === "binary") out.write(msg.bytes);
+  if (msg.type === "audio_end") break;
+}
 out.end();
 ```
 

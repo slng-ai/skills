@@ -108,7 +108,7 @@ the same way:
 [ -n "$SLNG_PROJECT_ID" ] && echo "SLNG_PROJECT_ID is set" || echo "SLNG_PROJECT_ID is NOT set"
 ```
 
-Pass it as `project_id=os.getenv("SLNG_PROJECT_ID")` to `SlngSTTService` and `SlngTTSService`.
+Pass it as `project_id=os.environ["SLNG_PROJECT_ID"]` to `SlngSTTService` and `SlngTTSService`.
 Send it as the `X-SLNG-Project-Id` header to the Context Router. A key created for one project uses
 that project when the id is missing, but requests without it will be rejected after the cutoff.
 If the installed plugin does not accept `project_id`, upgrade it.
@@ -196,7 +196,7 @@ selected, replace only the current LLM constructor with Pipecat's OpenAI-compati
 configuration. Preserve the rest of the pipeline, transport, and bot configuration.
 
 Do not inline secrets. Pass `api_key=os.getenv("SLNG_API_KEY")`, never a literal, and
-`project_id=os.getenv("SLNG_PROJECT_ID")`. Use the same env vars for the Context Router. For Context
+`project_id=os.environ["SLNG_PROJECT_ID"]`. Use the same env vars for the Context Router. For Context
 Router, use the `slng/auto` model (via
 `settings=OpenAILLMService.Settings(model="slng/auto")` in current Pipecat) and add
 `X-Slng-Agent-Id` and `X-Slng-Session-Id` as `default_headers` using stable identifiers already

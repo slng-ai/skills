@@ -26,7 +26,7 @@ from pipecat_slng import SlngHttpTTSService
 ```
 
 The services take `api_key` explicitly. Pass `api_key=os.getenv("SLNG_API_KEY")` at the call site.
-Never inline the key. Also pass `project_id=os.getenv("SLNG_PROJECT_ID")`, the project UUID. It is
+Never inline the key. Also pass `project_id=os.environ["SLNG_PROJECT_ID"]`, the project UUID. It is
 sent as the `X-SLNG-Project-Id` header and picks the project the traffic is billed and limited under.
 
 ## STT - `SlngSTTService`
@@ -36,7 +36,7 @@ Streams over `wss://api.slng.ai/v1/bridges/unmute/stt/{model}`.
 ```python
 SlngSTTService(
     api_key=os.getenv("SLNG_API_KEY"),
-    project_id=os.getenv("SLNG_PROJECT_ID"),  # project UUID, sent as X-SLNG-Project-Id
+    project_id=os.environ["SLNG_PROJECT_ID"],  # project UUID, sent as X-SLNG-Project-Id
     model="slng/deepgram/nova:3-en",   # default; slng/provider/model:variant-language
     language=Language.EN,              # default
     region_override=None,              # e.g. "eu-north-1"
@@ -56,7 +56,7 @@ agents: low latency with mid-utterance interruption support.
 ```python
 SlngTTSService(
     api_key=os.getenv("SLNG_API_KEY"),
-    project_id=os.getenv("SLNG_PROJECT_ID"),
+    project_id=os.environ["SLNG_PROJECT_ID"],
     model="slng/deepgram/aura:2-en",   # default; slng/provider/model:variant-language
     voice="aura-2-thalia-en",          # voice id for the chosen model
     language=Language.EN,
@@ -219,12 +219,12 @@ aggregators, and the LLM as they are unless provisioned SLNG Context Router was 
 ```python
 stt = SlngSTTService(
     api_key=os.getenv("SLNG_API_KEY"),
-    project_id=os.getenv("SLNG_PROJECT_ID"),
+    project_id=os.environ["SLNG_PROJECT_ID"],
     model="slng/deepgram/nova:3-en",
 )
 tts = SlngTTSService(
     api_key=os.getenv("SLNG_API_KEY"),
-    project_id=os.getenv("SLNG_PROJECT_ID"),
+    project_id=os.environ["SLNG_PROJECT_ID"],
     model="cartesia/sonic:3",
     voice="9626c31c-bec5-4cca-baa8-f8ba9e84c8bc",  # same Cartesia voice id as before
 )

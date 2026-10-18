@@ -53,16 +53,22 @@ from pipecat_slng import SlngSTTService, SlngTTSService
 def _fake_key(monkeypatch):
     # A dummy value is fine for a config assertion.
     monkeypatch.setenv("SLNG_API_KEY", "test-key")
+    monkeypatch.setenv("SLNG_PROJECT_ID", "00000000-0000-4000-8000-000000000000")
 
 
 def test_stt_is_slng_nova_3():
-    stt = SlngSTTService(api_key=os.getenv("SLNG_API_KEY"), model="slng/deepgram/nova:3-en")
+    stt = SlngSTTService(
+        api_key=os.getenv("SLNG_API_KEY"),
+        project_id=os.environ["SLNG_PROJECT_ID"],
+        model="slng/deepgram/nova:3-en",
+    )
     assert isinstance(stt, SlngSTTService)
 
 
 def test_tts_is_slng_aura_2():
     tts = SlngTTSService(
         api_key=os.getenv("SLNG_API_KEY"),
+        project_id=os.environ["SLNG_PROJECT_ID"],
         model="slng/deepgram/aura:2-en",
         voice="aura-2-thalia-en",
     )

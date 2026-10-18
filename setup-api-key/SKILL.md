@@ -121,7 +121,14 @@ API keys belong to the organization. Each TTS, STT and Context Router request na
 
 Get the id from the dashboard: open the project at https://app.slng.ai, go to its **Settings** page, and copy the **Project ID** (a UUID). The **Copy project ID** action in the project list gives the same value.
 
-The skills read it from `SLNG_PROJECT_ID`. Save it next to the key:
+The skills read it from `SLNG_PROJECT_ID`. Check whether it is already set:
+
+```bash
+[ -n "$SLNG_PROJECT_ID" ] && echo "SLNG_PROJECT_ID is set" || echo "SLNG_PROJECT_ID is NOT set"
+grep -E '^SLNG_PROJECT_ID=' .env 2>/dev/null
+```
+
+If it is missing, save it next to the key. Never leave it set to an empty value: an empty header gets `400 Invalid X-SLNG-Project-Id header`.
 
 ```bash
 echo 'SLNG_PROJECT_ID=...' >> .env
@@ -138,7 +145,7 @@ A key that was created for one project uses that project when the header is miss
 | Variable | Purpose | Required |
 |----------|---------|----------|
 | `VOICEAI_API_KEY` | Bearer token sent as `Authorization: Bearer <key>` | Yes |
-| `SLNG_PROJECT_ID` | Project UUID sent as the `X-SLNG-Project-Id` header on TTS, STT and Context Router requests | Yes, unless the key has a default project |
+| `SLNG_PROJECT_ID` | Project UUID sent as the `X-SLNG-Project-Id` header on TTS, STT and Context Router requests | Yes. Keys with a default project work without it until the cutoff |
 | `VOICEAI_BASE_URL` | Override the unified base URL (default `https://api.slng.ai`). Used by TTS/STT and by `voiceai whoami` (`/v1/me`) | No |
 | `VOICEAI_AGENTS_BASE_URL` | Override the agents API base URL (default `https://api.agents.slng.ai`). Used by the agents skill | No |
 
