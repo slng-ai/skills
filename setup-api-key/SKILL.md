@@ -1,12 +1,12 @@
 ---
 name: setup-api-key
-description: Configure and validate a slng.ai Voice AI API key. Use when getting started with slng, when an API call returns 401, or when the user asks to "set up VOICEAI_API_KEY", "configure slng credentials", or "get a voiceai key".
+description: Configure and validate a slng.ai Voice AI API key. Use when getting started with slng, when an API call returns 401, or when the user asks to "set up VOICEAI_API_KEY", "configure slng credentials", or "get a voiceai key". Also use when a request fails because of `X-SLNG-Project-Id` or `SLNG_PROJECT_ID`.
 license: MIT
 ---
 
 # Setup slng API Key
 
-Configure `VOICEAI_API_KEY` so the CLI, SDKs, and direct REST calls can authenticate against `https://api.slng.ai`.
+Configure `VOICEAI_API_KEY` so the CLI, SDKs, and direct REST calls can authenticate against `https://api.slng.ai`, and `SLNG_PROJECT_ID` so they name the project each request belongs to.
 
 ## Handling rules
 
@@ -34,7 +34,7 @@ Also check a project `.env`:
 grep -E '^VOICEAI_API_KEY=' .env 2>/dev/null
 ```
 
-If a key is set, validate it (see step 3) and stop. Do not prompt the user.
+If a key is set, validate it (see step 3), then check the project id (step 5). Do not prompt the user for the key.
 
 ### 2. If missing, obtain a key
 
@@ -115,11 +115,30 @@ voiceai config reset --force
 
 Useful when reconfiguring against a different workspace or before uninstalling — `brew uninstall` does not remove the config directory.
 
+### 5. Set the project id
+
+API keys belong to the organization. Each TTS, STT and Context Router request names its project in the `X-SLNG-Project-Id` header. The project decides billing and limits for that request.
+
+Get the id from the dashboard: open the project at https://app.slng.ai, go to its **Settings** page, and copy the **Project ID** (a UUID). The **Copy project ID** action in the project list gives the same value.
+
+The skills read it from `SLNG_PROJECT_ID`. Save it next to the key:
+
+```bash
+echo 'SLNG_PROJECT_ID=...' >> .env
+# or
+echo 'export SLNG_PROJECT_ID="..."' >> ~/.zshrc
+```
+
+The CLI reads `SLNG_PROJECT_ID` for `voiceai tts` and `voiceai stt`, or takes `--project <id>`.
+
+A key that was created for one project uses that project when the header is missing. Send the header anyway: requests without it will be rejected after the cutoff. Agent management calls on `https://api.agents.slng.ai` do not need the header.
+
 ## Environment variables
 
 | Variable | Purpose | Required |
 |----------|---------|----------|
 | `VOICEAI_API_KEY` | Bearer token sent as `Authorization: Bearer <key>` | Yes |
+| `SLNG_PROJECT_ID` | Project UUID sent as the `X-SLNG-Project-Id` header on TTS, STT and Context Router requests | Yes, unless the key has a default project |
 | `VOICEAI_BASE_URL` | Override the unified base URL (default `https://api.slng.ai`). Used by TTS/STT and by `voiceai whoami` (`/v1/me`) | No |
 | `VOICEAI_AGENTS_BASE_URL` | Override the agents API base URL (default `https://api.agents.slng.ai`). Used by the agents skill | No |
 
@@ -131,5 +150,7 @@ Useful when reconfiguring against a different workspace or before uninstalling �
 ## Common errors
 
 - **401 Unauthorized** — key missing, malformed, or revoked. Re-check the dashboard.
+- **400 `X-SLNG-Project-Id header is required`** or **`Invalid X-SLNG-Project-Id header`**: set `SLNG_PROJECT_ID` to the project UUID (step 5).
+- **403 `project not found or not available in this region`**: the project does not belong to the key's organization, or it is not available in the region you called.
 - **403 Forbidden** — key is valid but lacks permission for that endpoint. Check the workspace it belongs to.
 - **429 Too Many Requests** — rate limit. Back off and retry.

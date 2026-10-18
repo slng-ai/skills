@@ -99,6 +99,20 @@ env file is ignored by git before writing to it.
 Unlike plugins that read the key implicitly, the SLNG Pipecat services take `api_key` explicitly.
 Wire `api_key=os.getenv("SLNG_API_KEY")` at the call site, never a literal.
 
+SLNG API keys belong to the organization, so the project id picks the project that the traffic is
+billed and limited under. Store the project UUID in `SLNG_PROJECT_ID`. It is on the project's
+Settings page in the [SLNG dashboard](https://app.slng.ai) (see the `setup-api-key` skill). Check it
+the same way:
+
+```bash
+[ -n "$SLNG_PROJECT_ID" ] && echo "SLNG_PROJECT_ID is set" || echo "SLNG_PROJECT_ID is NOT set"
+```
+
+Pass it as `project_id=os.getenv("SLNG_PROJECT_ID")` to `SlngSTTService` and `SlngTTSService`.
+Send it as the `X-SLNG-Project-Id` header to the Context Router. A key created for one project uses
+that project when the id is missing, but requests without it will be rejected after the cutoff.
+If the installed plugin does not accept `project_id`, upgrade it.
+
 ## 4. Install and Probe Required Plugins
 
 Install `pipecat-slng` with the detected package manager:
@@ -152,7 +166,8 @@ Default to a faithful migration:
   SLNG LLM was selected.
 - If SLNG LLM was selected, replace only the LLM constructor with Pipecat's `OpenAILLMService`
   pointed at the selected regional SLNG Context Router base URL, `model="slng/auto"`, and required
-  `X-Slng-Agent-Id` / `X-Slng-Session-Id` headers from stable project identifiers.
+  `X-Slng-Agent-Id` / `X-Slng-Session-Id` headers from stable project identifiers, plus
+  `X-SLNG-Project-Id` from `SLNG_PROJECT_ID`.
 - Use automatic region selection unless the user needs a pinned region for latency or residency
   (`region_override`, or `world_part_override` for a coarser zone).
 
@@ -180,12 +195,13 @@ Replace only the STT and TTS service constructors that feed `Pipeline([...])` wi
 selected, replace only the current LLM constructor with Pipecat's OpenAI-compatible LLM
 configuration. Preserve the rest of the pipeline, transport, and bot configuration.
 
-Do not inline secrets. Pass `api_key=os.getenv("SLNG_API_KEY")`, never a literal. Use the same env
-var for the Context Router. For Context Router, use the `slng/auto` model (via
+Do not inline secrets. Pass `api_key=os.getenv("SLNG_API_KEY")`, never a literal, and
+`project_id=os.getenv("SLNG_PROJECT_ID")`. Use the same env vars for the Context Router. For Context
+Router, use the `slng/auto` model (via
 `settings=OpenAILLMService.Settings(model="slng/auto")` in current Pipecat) and add
 `X-Slng-Agent-Id` and `X-Slng-Session-Id` as `default_headers` using stable identifiers already
-present in the bot/session context. Do not generate random IDs per request, and do not expose provider/catalog model ids in
-code.
+present in the bot/session context, plus `X-SLNG-Project-Id` from `SLNG_PROJECT_ID`. Do not generate
+random IDs per request, and do not expose provider/catalog model ids in code.
 
 Before inserting anything, check whether the project already contains:
 

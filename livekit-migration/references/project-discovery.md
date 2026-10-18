@@ -42,13 +42,15 @@ or `python`.
 Search for dotenv and env references:
 
 ```bash
-rg -n "load_dotenv|SLNG_API_KEY|VOICEAI_API_KEY|os\.environ|getenv|dotenv" .
+rg -n "load_dotenv|SLNG_API_KEY|SLNG_PROJECT_ID|VOICEAI_API_KEY|os\.environ|getenv|dotenv" .
 ```
 
 The SLNG LiveKit plugin reads `SLNG_API_KEY` by default. The SLNG Context Router uses the same variable
 when SLNG LLM is selected. Some SLNG projects may already have `VOICEAI_API_KEY` for the CLI or REST
 skills. If `VOICEAI_API_KEY` is present and validated, configure `SLNG_API_KEY` to the same value for
 the LiveKit runtime instead of asking for a second key.
+Also configure `SLNG_PROJECT_ID` (the project UUID) in the same place. The SLNG services and the
+Context Router send it as the `X-SLNG-Project-Id` header.
 
 Store secrets where the project already expects runtime secrets:
 
@@ -93,5 +95,5 @@ LLM: ... (will migrate to SLNG Context Router via LiveKit OpenAI-compatible plug
 LLM router base URL: ...
 LLM router model: slng/auto
 Router org config: provisioned / not confirmed
-Router headers: stable agent id ..., stable session id ...
+Router headers: stable agent id ..., stable session id ..., project id from SLNG_PROJECT_ID
 ```

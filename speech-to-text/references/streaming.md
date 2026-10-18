@@ -6,7 +6,7 @@ WebSocket URL: `wss://api.slng.ai/v1/stt/{provider}/{model}:{variant}`
 
 ## Protocol
 
-1. Connect with `Authorization: Bearer <key>` header.
+1. Connect with the `Authorization: Bearer <key>` and `X-SLNG-Project-Id: <project id>` headers.
 2. Send an init JSON frame:
 
    ```json
@@ -50,7 +50,10 @@ import asyncio, json, os, websockets
 URL = "wss://api.slng.ai/v1/stt/slng/deepgram/nova:3-en"
 
 async def transcribe(path: str):
-    headers = {"Authorization": f"Bearer {os.environ['VOICEAI_API_KEY']}"}
+    headers = {
+        "Authorization": f"Bearer {os.environ['VOICEAI_API_KEY']}",
+        "X-SLNG-Project-Id": os.environ["SLNG_PROJECT_ID"],
+    }
     async with websockets.connect(URL, extra_headers=headers) as ws:
         await ws.send(json.dumps({
             "type": "init",
@@ -86,9 +89,10 @@ asyncio.run(transcribe("audio.raw"))
 With the SDK:
 
 ```python
+import os
 from voiceai import VoiceAI
 
-client = VoiceAI()
+client = VoiceAI(default_headers={"X-SLNG-Project-Id": os.environ["SLNG_PROJECT_ID"]})
 async with client.stt.stream(model="slng/deepgram/nova:3-en", encoding="linear16", sample_rate=16000) as session:
     async for chunk in iter_mic():
         await session.send(chunk)
@@ -105,7 +109,10 @@ import { readFileSync } from "fs";
 
 const URL = "wss://api.slng.ai/v1/stt/slng/deepgram/nova:3-en";
 const ws = new WebSocket(URL, {
-  headers: { Authorization: `Bearer ${process.env.VOICEAI_API_KEY}` },
+  headers: {
+    Authorization: `Bearer ${process.env.VOICEAI_API_KEY}`,
+    "X-SLNG-Project-Id": process.env.SLNG_PROJECT_ID!,
+  },
 });
 
 ws.on("open", () => {
@@ -132,7 +139,9 @@ With the SDK:
 ```typescript
 import { VoiceAI } from "voiceai-sdk";
 
-const client = new VoiceAI();
+const client = new VoiceAI({
+  defaultHeaders: { "X-SLNG-Project-Id": process.env.SLNG_PROJECT_ID! },
+});
 const session = await client.stt.stream({
   model: "slng/deepgram/nova:3-en",
   encoding: "linear16",
@@ -148,7 +157,8 @@ await session.close();
 
 ```bash
 npx wscat -c wss://api.slng.ai/v1/stt/slng/deepgram/nova:3-en \
-  -H "Authorization: Bearer $VOICEAI_API_KEY"
+  -H "Authorization: Bearer $VOICEAI_API_KEY" \
+  -H "X-SLNG-Project-Id: $SLNG_PROJECT_ID"
 
 # then paste:
 {"type":"init","config":{"language":"en","sample_rate":16000,"encoding":"linear16"}}

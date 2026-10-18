@@ -2,14 +2,14 @@
 name: speech-to-text
 description: Transcribe audio to text using the slng.ai Voice AI API. Use when transcribing audio files, building live captions, processing meeting recordings, or working with Deepgram Nova, Sarvam Saaras, Soniox, or Reson8 STT via slng.
 license: MIT
-compatibility: Requires internet access and a slng.ai API key (VOICEAI_API_KEY).
+compatibility: Requires internet access, a slng.ai API key (VOICEAI_API_KEY) and a project id (SLNG_PROJECT_ID).
 ---
 
 # slng Speech-to-Text
 
 Transcribe audio (file or live stream) through slng's unified STT API. One protocol reaches every provider (Deepgram, Sarvam, Soniox, Reson8). File transcription uses HTTP; live audio uses WebSocket.
 
-> **Setup:** [`setup-api-key`](../setup-api-key/SKILL.md) configures `VOICEAI_API_KEY`. Install paths are in [`references/installation.md`](references/installation.md).
+> **Setup:** [`setup-api-key`](../setup-api-key/SKILL.md) configures `VOICEAI_API_KEY` and `SLNG_PROJECT_ID`. Every request sends the project id in the `X-SLNG-Project-Id` header (the CLI reads `SLNG_PROJECT_ID` or `--project <id>`). Install paths are in [`references/installation.md`](references/installation.md).
 
 ## Quick Start
 
@@ -31,7 +31,10 @@ import os, requests
 with open("audio.wav", "rb") as f:
     r = requests.post(
         "https://api.slng.ai/v1/stt/slng/deepgram/nova:3-en",
-        headers={"Authorization": f"Bearer {os.environ['VOICEAI_API_KEY']}"},
+        headers={
+            "Authorization": f"Bearer {os.environ['VOICEAI_API_KEY']}",
+            "X-SLNG-Project-Id": os.environ["SLNG_PROJECT_ID"],
+        },
         files={"audio": f},
     )
 
@@ -48,7 +51,10 @@ form.append("audio", new Blob([readFileSync("audio.wav")]), "audio.wav");
 
 const r = await fetch("https://api.slng.ai/v1/stt/slng/deepgram/nova:3-en", {
   method: "POST",
-  headers: { Authorization: `Bearer ${process.env.VOICEAI_API_KEY}` },
+  headers: {
+    Authorization: `Bearer ${process.env.VOICEAI_API_KEY}`,
+    "X-SLNG-Project-Id": process.env.SLNG_PROJECT_ID!,
+  },
   body: form,
 });
 console.log((await r.json()).transcript);
@@ -59,6 +65,7 @@ console.log((await r.json()).transcript);
 ```bash
 curl https://api.slng.ai/v1/stt/slng/deepgram/nova:3-en \
   -H "Authorization: Bearer $VOICEAI_API_KEY" \
+  -H "X-SLNG-Project-Id: $SLNG_PROJECT_ID" \
   -F "audio=@audio.wav"
 ```
 
@@ -129,6 +136,8 @@ Streaming returns a series of events: `ready`, `partial_transcript`, `final_tran
 |--------|---------|-----|
 | `401` | Invalid API key | Check `VOICEAI_API_KEY` |
 | `400` | Bad audio format or missing field | Verify `Content-Type`, file encoding |
+| `400` | `X-SLNG-Project-Id header is required` or `Invalid X-SLNG-Project-Id header` | Send the project UUID from `SLNG_PROJECT_ID` in `X-SLNG-Project-Id` |
+| `403` | `project not found or not available in this region` | Use a project of the key's organization that is available in the region you call |
 | `413` | File too large | Chunk or use streaming |
 | `429` | Rate limit | Back off |
 

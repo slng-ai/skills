@@ -6,7 +6,7 @@ WebSocket URL: `wss://api.slng.ai/v1/tts/{provider}/{model}:{variant}/ws`
 
 ## Protocol
 
-1. Connect with `Authorization: Bearer <key>` header.
+1. Connect with the `Authorization: Bearer <key>` and `X-SLNG-Project-Id: <project id>` headers.
 2. Send a text frame with the synthesis request:
 
    ```json
@@ -40,7 +40,10 @@ import asyncio, json, os, base64, websockets
 URL = "wss://api.slng.ai/v1/tts/slng/deepgram/aura:2/ws"
 
 async def stream_tts(text: str, out_path: str):
-    headers = {"Authorization": f"Bearer {os.environ['VOICEAI_API_KEY']}"}
+    headers = {
+        "Authorization": f"Bearer {os.environ['VOICEAI_API_KEY']}",
+        "X-SLNG-Project-Id": os.environ["SLNG_PROJECT_ID"],
+    }
     async with websockets.connect(URL, extra_headers=headers) as ws:
         await ws.send(json.dumps({
             "type": "synthesize",
@@ -64,9 +67,10 @@ asyncio.run(stream_tts("Stream me line by line...", "out.mp3"))
 With the SDK:
 
 ```python
+import os
 from voiceai import VoiceAI
 
-client = VoiceAI()
+client = VoiceAI(default_headers={"X-SLNG-Project-Id": os.environ["SLNG_PROJECT_ID"]})
 with client.tts.stream(model="slng/deepgram/aura:2-en", text="...", voice="aura-2-luna-en") as stream, \
      open("out.mp3", "wb") as f:
     for chunk in stream:
@@ -80,7 +84,10 @@ import WebSocket from "ws";
 import { writeFileSync, appendFileSync } from "fs";
 
 const ws = new WebSocket("wss://api.slng.ai/v1/tts/slng/deepgram/aura:2/ws", {
-  headers: { Authorization: `Bearer ${process.env.VOICEAI_API_KEY}` },
+  headers: {
+    Authorization: `Bearer ${process.env.VOICEAI_API_KEY}`,
+    "X-SLNG-Project-Id": process.env.SLNG_PROJECT_ID!,
+  },
 });
 
 writeFileSync("out.mp3", "");
@@ -110,7 +117,9 @@ With the SDK:
 import { VoiceAI } from "voiceai-sdk";
 import { createWriteStream } from "fs";
 
-const client = new VoiceAI();
+const client = new VoiceAI({
+  defaultHeaders: { "X-SLNG-Project-Id": process.env.SLNG_PROJECT_ID! },
+});
 const stream = await client.tts.stream({
   model: "slng/deepgram/aura:2-en",
   text: "...",
@@ -127,7 +136,8 @@ Quick smoke test:
 
 ```bash
 npx wscat -c wss://api.slng.ai/v1/tts/slng/deepgram/aura:2/ws \
-  -H "Authorization: Bearer $VOICEAI_API_KEY"
+  -H "Authorization: Bearer $VOICEAI_API_KEY" \
+  -H "X-SLNG-Project-Id: $SLNG_PROJECT_ID"
 
 # then paste:
 {"type":"synthesize","text":"hello","model":"aura-2-luna-en"}

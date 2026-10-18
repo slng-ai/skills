@@ -26,11 +26,16 @@ from livekit.plugins import slng
 The plugin reads `SLNG_API_KEY` from the environment automatically. Pass `api_key=os.environ["SLNG_API_KEY"]`
 explicitly if you want it visible at the call site. Never inline the key.
 
+The plugin does not read the project id from the environment. Pass
+`project_id=os.environ["SLNG_PROJECT_ID"]`, the project UUID, to `slng.STT` and `slng.TTS`. It is sent
+as the `X-SLNG-Project-Id` header and picks the project the traffic is billed and limited under.
+
 ## STT - `slng.STT`
 
 ```python
 slng.STT(
     model="deepgram/nova:3",     # default; provider/model:variant
+    project_id=os.environ["SLNG_PROJECT_ID"],  # project UUID, sent as X-SLNG-Project-Id
     language="en",               # default
     region_override=None,        # e.g. "eu-north-1", or a priority list
     # api_key, slng_base_url="api.slng.ai", sample_rate, encoding,
@@ -43,6 +48,7 @@ slng.STT(
 ```python
 slng.TTS(
     model="deepgram/aura:2",     # default; provider/model:variant
+    project_id=os.environ["SLNG_PROJECT_ID"],
     voice="default",             # voice id for the chosen model
     language="en",
     region_override=None,
@@ -99,13 +105,15 @@ llm = openai.LLM(
     extra_headers={
         "X-Slng-Agent-Id": agent_id,
         "X-Slng-Session-Id": session_id,
+        "X-SLNG-Project-Id": os.environ["SLNG_PROJECT_ID"],
     },
 )
 ```
 
 Use stable project identifiers for `agent_id` and `session_id`, such as the configured LiveKit agent
-name and room/session id. Do not generate random IDs per request. These headers are required for
-agent-context routing, tracing, caching, and token-savings behavior.
+name and room/session id. `X-SLNG-Project-Id` comes from `SLNG_PROJECT_ID`. Do not generate random
+IDs per request. These headers are required for agent-context routing, tracing, caching, and
+token-savings behavior.
 
 Regional base URLs:
 
@@ -171,8 +179,16 @@ In `AgentSession(...)`, replace STT and TTS (leave `vad`, `turn_detection`, and
 Router was selected):
 
 ```python
-stt=slng.STT(model="deepgram/nova:3", language="multi"),
-tts=slng.TTS(model="cartesia/sonic:3", voice="9626c31c-bec5-4cca-baa8-f8ba9e84c8bc"),
+stt=slng.STT(
+    model="deepgram/nova:3",
+    language="multi",
+    project_id=os.environ["SLNG_PROJECT_ID"],
+),
+tts=slng.TTS(
+    model="cartesia/sonic:3",
+    voice="9626c31c-bec5-4cca-baa8-f8ba9e84c8bc",
+    project_id=os.environ["SLNG_PROJECT_ID"],
+),
 ```
 
 Add `region_override="eu-north-1"` (or your region) to either call for data residency.
@@ -190,6 +206,7 @@ llm=openai.LLM(
     extra_headers={
         "X-Slng-Agent-Id": agent_id,
         "X-Slng-Session-Id": session_id,
+        "X-SLNG-Project-Id": os.environ["SLNG_PROJECT_ID"],
     },
 )
 ```

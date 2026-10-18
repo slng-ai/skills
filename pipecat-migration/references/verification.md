@@ -34,7 +34,7 @@ Prefer a test that imports the project's own service factory or bot builder and 
 configured STT and TTS are `SlngSTTService` and `SlngTTSService`. If provisioned SLNG Context Router was
 selected, assert the LLM is Pipecat's `OpenAILLMService` configured with the selected regional
 `base_url`, `model="slng/auto"`, environment-backed API key, and required `X-Slng-Agent-Id` /
-`X-Slng-Session-Id` headers. This catches future edits to the actual bot.
+`X-Slng-Session-Id` / `X-SLNG-Project-Id` headers. This catches future edits to the actual bot.
 
 If the project has no factory, add one only when it keeps the edit small and makes the pipeline easier
 to test. Do not refactor unrelated business logic just to add a test.
@@ -88,7 +88,8 @@ A passing unit test and clean lint only prove the code is wired to the right str
 when the bot is broken at runtime (missing org/router config, invalid key, provider rejecting the
 request, or unstable agent/session identifiers preventing router behavior).
 **Only a live spoken turn that completes STT -> LLM -> TTS proves the migration works.** This step needs
-a real `SLNG_API_KEY` in the project's runtime environment, validated against `/v1/agents`, plus
+a real `SLNG_API_KEY` and `SLNG_PROJECT_ID` in the project's runtime environment, with the key
+validated against `/v1/agents`, plus
 whatever credentials the project's transport requires (Daily room/API key, telephony number, ...).
 
 Use the discovered entrypoint and transport. For a SmallWebRTC bot:
@@ -120,15 +121,16 @@ uv run ruff check
 - [ ] `git status` was clean before the migration started (clean rollback point).
 - [ ] `from pipecat_slng import SlngSTTService, SlngTTSService` imports successfully.
 - [ ] STT and TTS are `SlngSTTService` / `SlngTTSService` wired to the intended models, in the same
-      `Pipeline([...])` positions as before.
+      `Pipeline([...])` positions as before, with `project_id` from `SLNG_PROJECT_ID`.
 - [ ] The LLM was left on its current provider, unless SLNG LLM was selected.
 - [ ] If SLNG LLM was selected, SLNG org/router configuration is provisioned.
 - [ ] If SLNG LLM was selected, the LLM uses Pipecat's `OpenAILLMService`, the selected regional
       Context Router base URL, `model="slng/auto"`, required `X-Slng-Agent-Id` / `X-Slng-Session-Id`
-      headers, and no `SlngLLMService` reference.
+      / `X-SLNG-Project-Id` headers, and no `SlngLLMService` reference.
 - [ ] No API key literal appears in the diff.
 - [ ] Project tests pass, including any STT/TTS assertions added for this migration.
 - [ ] `SLNG_API_KEY` is available to the runtime and validates against `/v1/me` (e.g. `voiceai whoami`).
+- [ ] `SLNG_PROJECT_ID` is available to the runtime and holds the project UUID from the dashboard.
 - [ ] A **live turn** completes: user transcript appears in logs **and** the spoken reply is heard (each stage verified independently).
 - [ ] Any stage left on its original provider is reported to the user with how to finish it.
 - [ ] The original entrypoint and deployment command still work.
@@ -156,5 +158,7 @@ These issues often surface only during a live turn:
 | Brief audio gap after changing voice/speed/language | Expected behavior: runtime setting changes reconnect the TTS WebSocket | No fix needed; avoid mid-utterance setting changes if the gap matters |
 | `speed` rejected or ignored | Model does not support speed (e.g. Rime, Sarvam) | Drop the `speed` argument for that model |
 | HTTP TTS returns an error for the audio format | `SlngHttpTTSService` handles WAV and plain PCM only; compressed formats error | Use server defaults, or switch to streaming `SlngTTSService` |
+| `400` `X-SLNG-Project-Id header is required` or `Invalid X-SLNG-Project-Id header` | `SLNG_PROJECT_ID` is missing or not a UUID | Set it to the project UUID from the dashboard and pass it as `project_id` and in the router headers |
+| `403` `project not found or not available in this region` | The project belongs to another organization, or is not available in the region used | Use a project of the key's organization and check its region |
 | STT works but TTS fails, or vice versa | One model, voice, provider route, or region is unavailable | Keep the working stage on SLNG, revert the failing stage to its original provider, and report the partial migration |
 | Provider-specific 400 during TTS/STT | Gateway or model-specific incompatibility | Confirm the current SLNG docs, retry with another supported model only as a temporary unblock, and report the issue |

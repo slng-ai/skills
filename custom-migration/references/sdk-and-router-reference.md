@@ -8,7 +8,7 @@ and selected stages.
 - Python STT/TTS SDK: `voiceai-sdk`
 - JavaScript/TypeScript STT/TTS SDK: `voiceai-sdk`
 - LLM: use an OpenAI-compatible client with an SLNG Router `base_url`/`baseURL`, provisioned org
-  config, `slng/auto`, and required agent/session headers
+  config, `slng/auto`, and required agent/session/project headers
 
 Do not use fake packages such as `slng-sdk`, or fake classes such as `VoiceAgent`, `STT`, `TTS`,
 `LLM`, or `Intelligence`, unless the target project already defines those names.
@@ -21,7 +21,10 @@ Prefer the project's existing sync/async style.
 import os
 from voiceai import Slng
 
-client = Slng(api_key=os.environ["SLNG_API_KEY"])
+client = Slng(
+    api_key=os.environ["SLNG_API_KEY"],
+    default_headers={"X-SLNG-Project-Id": os.environ["SLNG_PROJECT_ID"]},
+)
 
 result = client.stt.transcribe(
     model="slng/deepgram/nova:3-en",
@@ -41,8 +44,14 @@ For async projects:
 import os
 from voiceai import AsyncSlng
 
-client = AsyncSlng(api_key=os.environ["SLNG_API_KEY"])
+client = AsyncSlng(
+    api_key=os.environ["SLNG_API_KEY"],
+    default_headers={"X-SLNG-Project-Id": os.environ["SLNG_PROJECT_ID"]},
+)
 ```
+
+`SLNG_PROJECT_ID` holds the project UUID. The header picks the project the traffic is billed and
+limited under.
 
 Use streaming SDK helpers only when replacing an existing streaming seam. Keep the current event names
 or adapter return shape so callers do not need to change.
@@ -54,7 +63,10 @@ For server-side Node/Bun projects:
 ```ts
 import Slng from "voiceai-sdk";
 
-const client = new Slng({ apiKey: process.env.SLNG_API_KEY });
+const client = new Slng({
+  apiKey: process.env.SLNG_API_KEY,
+  defaultHeaders: { "X-SLNG-Project-Id": process.env.SLNG_PROJECT_ID! },
+});
 
 const transcript = await client.stt.transcribe({
   model: "slng/deepgram/nova:3-en",
@@ -68,7 +80,8 @@ const audio = await client.tts.generate({
 });
 ```
 
-Use `StreamingClient` only when replacing an existing streaming STT/TTS seam. Do not expose
+Use `StreamingClient` only when replacing an existing streaming STT/TTS seam, and pass it
+`projectId: process.env.SLNG_PROJECT_ID` (`project_id=` in Python). Do not expose
 `SLNG_API_KEY` in browser bundles; route browser audio/text through a server-side endpoint.
 
 ## Optional Context Router
@@ -98,6 +111,7 @@ llm = OpenAI(
     default_headers={
         "X-Slng-Agent-Id": agent_id,
         "X-Slng-Session-Id": session_id,
+        "X-SLNG-Project-Id": os.environ["SLNG_PROJECT_ID"],
     },
 )
 
@@ -118,6 +132,7 @@ const llm = new OpenAI({
   defaultHeaders: {
     "X-Slng-Agent-Id": agentId,
     "X-Slng-Session-Id": sessionId,
+    "X-SLNG-Project-Id": process.env.SLNG_PROJECT_ID!,
   },
 });
 
@@ -133,8 +148,9 @@ and other router parameters in org configuration. If org configuration is not re
 edits and report that SLNG must provision it before verification.
 
 Use stable project identifiers for `agent_id`/`agentId` and `session_id`/`sessionId`, such as an app
-agent id plus conversation, room, call, or session id. Do not generate random IDs per request. Preserve
-streaming behavior if the old LLM call streamed.
+agent id plus conversation, room, call, or session id. `X-SLNG-Project-Id` comes from
+`SLNG_PROJECT_ID`. Do not generate random IDs per request. Preserve streaming behavior if the old
+LLM call streamed.
 
 ## Region and Model Notes
 
