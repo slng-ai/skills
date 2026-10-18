@@ -20,7 +20,10 @@ CLI prints the transcript to stdout; pipe to `jq` or a file as needed.
 import os
 from voiceai import VoiceAI
 
-client = VoiceAI(api_key=os.environ["VOICEAI_API_KEY"])
+client = VoiceAI(
+    api_key=os.environ["VOICEAI_API_KEY"],
+    default_headers={"X-SLNG-Project-Id": os.environ["SLNG_PROJECT_ID"]},
+)
 
 with open("audio.wav", "rb") as f:
     result = client.stt.transcribe(
@@ -43,7 +46,10 @@ import os, requests
 with open("audio.wav", "rb") as f:
     r = requests.post(
         "https://api.slng.ai/v1/stt/slng/deepgram/nova:3-en",
-        headers={"Authorization": f"Bearer {os.environ['VOICEAI_API_KEY']}"},
+        headers={
+            "Authorization": f"Bearer {os.environ['VOICEAI_API_KEY']}",
+            "X-SLNG-Project-Id": os.environ["SLNG_PROJECT_ID"],
+        },
         files={"audio": f},
         data={"language": "en"},   # form fields go alongside the file
     )
@@ -59,7 +65,10 @@ print(data["transcript"])
 import { VoiceAI } from "voiceai-sdk";
 import { createReadStream } from "fs";
 
-const client = new VoiceAI({ apiKey: process.env.VOICEAI_API_KEY! });
+const client = new VoiceAI({
+  apiKey: process.env.VOICEAI_API_KEY!,
+  defaultHeaders: { "X-SLNG-Project-Id": process.env.SLNG_PROJECT_ID! },
+});
 
 const result = await client.stt.transcribe({
   model: "slng/deepgram/nova:3-en",
@@ -81,7 +90,10 @@ form.append("language", "en");
 
 const r = await fetch("https://api.slng.ai/v1/stt/slng/deepgram/nova:3-en", {
   method: "POST",
-  headers: { Authorization: `Bearer ${process.env.VOICEAI_API_KEY}` },
+  headers: {
+    Authorization: `Bearer ${process.env.VOICEAI_API_KEY}`,
+    "X-SLNG-Project-Id": process.env.SLNG_PROJECT_ID!,
+  },
   body: form,
 });
 console.log(await r.json());
@@ -92,6 +104,7 @@ console.log(await r.json());
 ```bash
 curl https://api.slng.ai/v1/stt/slng/deepgram/nova:3-en \
   -H "Authorization: Bearer $VOICEAI_API_KEY" \
+  -H "X-SLNG-Project-Id: $SLNG_PROJECT_ID" \
   -F "audio=@audio.wav" \
   -F "language=en"
 ```

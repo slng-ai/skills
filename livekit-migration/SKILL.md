@@ -93,6 +93,20 @@ Store the key using the project's discovered env convention. For the official st
 `.env.local`; other projects may use `.env`, shell env, deployment secrets, or container config.
 Confirm any local env file is ignored by git before writing to it.
 
+SLNG API keys belong to the organization, so the project id picks the project that the traffic is
+billed and limited under. Store the project UUID in `SLNG_PROJECT_ID`. It is on the project's
+Settings page in the [SLNG dashboard](https://app.slng.ai) (see the `setup-api-key` skill). Check it
+the same way:
+
+```bash
+[ -n "$SLNG_PROJECT_ID" ] && echo "SLNG_PROJECT_ID is set" || echo "SLNG_PROJECT_ID is NOT set"
+```
+
+The plugin does not read it from the environment: pass `project_id=os.environ["SLNG_PROJECT_ID"]`
+to `slng.STT` and `slng.TTS`. Send it as the `X-SLNG-Project-Id` header to the Context Router. A key
+created for one project uses that project when the id is missing, but requests without it will be
+rejected after the cutoff. If the installed plugin does not accept `project_id`, upgrade it.
+
 ## 4. Install and Probe Required Plugins
 
 Install `livekit-plugins-slng` with the detected package manager:
@@ -141,7 +155,8 @@ Default to a faithful migration:
 - Leave the LLM and non-speech LiveKit components unchanged unless SLNG LLM was selected.
 - If SLNG LLM was selected, replace only the LLM constructor with LiveKit's OpenAI-compatible LLM
   pointed at the selected regional SLNG Context Router base URL, `model="slng/auto"`, and required
-  `X-Slng-Agent-Id` / `X-Slng-Session-Id` headers from stable project identifiers.
+  `X-Slng-Agent-Id` / `X-Slng-Session-Id` headers from stable project identifiers, plus
+  `X-SLNG-Project-Id` from `SLNG_PROJECT_ID`.
 - Use automatic region selection unless the user needs a pinned region for latency or residency.
 
 Ask the user only when the current project does not contain enough information to choose safely. If a
@@ -162,10 +177,11 @@ Preserve the rest of the session and agent configuration.
 
 Do not inline secrets. Usually no explicit `api_key` argument is needed because the plugin reads
 `SLNG_API_KEY`. If the call site must be explicit, use `os.environ["SLNG_API_KEY"]`, never a literal.
+Always pass `project_id=os.environ["SLNG_PROJECT_ID"]` to `slng.STT` and `slng.TTS`.
 Use the same env var for the Context Router. For Context Router, use `model="slng/auto"` and add
 `X-Slng-Agent-Id` and `X-Slng-Session-Id` as headers using stable identifiers already present in the
-agent/session/room context. Do not generate random IDs per request, and do not expose provider/catalog
-model ids in code.
+agent/session/room context, plus `X-SLNG-Project-Id` from `SLNG_PROJECT_ID`. Do not generate random
+IDs per request, and do not expose provider/catalog model ids in code.
 
 Before inserting anything, check whether the project already contains:
 

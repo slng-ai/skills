@@ -20,12 +20,13 @@ manager config before choosing install, test, or boot commands.
 Search for env access and dotenv conventions:
 
 ```bash
-rg -n "SLNG_API_KEY|VOICEAI_API_KEY|process\.env|os\.environ|getenv|load_dotenv|dotenv|env_file" .
+rg -n "SLNG_API_KEY|SLNG_PROJECT_ID|VOICEAI_API_KEY|process\.env|os\.environ|getenv|load_dotenv|dotenv|env_file" .
 ```
 
 Use `SLNG_API_KEY` for new SLNG wiring. If `VOICEAI_API_KEY` already exists, validate it before
 mapping it to `SLNG_API_KEY`. Do not write local secret files unless they are ignored by git and match
-the project's existing convention.
+the project's existing convention. Configure `SLNG_PROJECT_ID` (the project UUID) in the same place;
+every SLNG stage sends it as the `X-SLNG-Project-Id` header.
 
 ## Detect Provider Boundaries
 

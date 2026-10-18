@@ -26,7 +26,8 @@ from pipecat_slng import SlngHttpTTSService
 ```
 
 The services take `api_key` explicitly. Pass `api_key=os.getenv("SLNG_API_KEY")` at the call site.
-Never inline the key.
+Never inline the key. Also pass `project_id=os.environ["SLNG_PROJECT_ID"]`, the project UUID. It is
+sent as the `X-SLNG-Project-Id` header and picks the project the traffic is billed and limited under.
 
 ## STT - `SlngSTTService`
 
@@ -35,6 +36,7 @@ Streams over `wss://api.slng.ai/v1/bridges/unmute/stt/{model}`.
 ```python
 SlngSTTService(
     api_key=os.getenv("SLNG_API_KEY"),
+    project_id=os.environ["SLNG_PROJECT_ID"],  # project UUID, sent as X-SLNG-Project-Id
     model="slng/deepgram/nova:3-en",   # default; slng/provider/model:variant-language
     language=Language.EN,              # default
     region_override=None,              # e.g. "eu-north-1"
@@ -54,6 +56,7 @@ agents: low latency with mid-utterance interruption support.
 ```python
 SlngTTSService(
     api_key=os.getenv("SLNG_API_KEY"),
+    project_id=os.environ["SLNG_PROJECT_ID"],
     model="slng/deepgram/aura:2-en",   # default; slng/provider/model:variant-language
     voice="aura-2-thalia-en",          # voice id for the chosen model
     language=Language.EN,
@@ -132,6 +135,7 @@ llm = OpenAILLMService(
     default_headers={
         "X-Slng-Agent-Id": agent_id,
         "X-Slng-Session-Id": session_id,
+        "X-SLNG-Project-Id": os.environ["SLNG_PROJECT_ID"],
     },
     settings=OpenAILLMService.Settings(model="slng/auto"),
 )
@@ -142,8 +146,9 @@ Match the constructor style the project already uses: current Pipecat passes the
 still works but is deprecated.
 
 Use stable project identifiers for `agent_id` and `session_id`, such as the configured bot name and
-the transport room/session id. Do not generate random IDs per request. These headers are required
-for agent-context routing, tracing, caching, and token-savings behavior.
+the transport room/session id. `X-SLNG-Project-Id` comes from `SLNG_PROJECT_ID`. Do not generate
+random IDs per request. These headers are required for agent-context routing, tracing, caching, and
+token-savings behavior.
 
 Regional base URLs:
 
@@ -214,10 +219,12 @@ aggregators, and the LLM as they are unless provisioned SLNG Context Router was 
 ```python
 stt = SlngSTTService(
     api_key=os.getenv("SLNG_API_KEY"),
+    project_id=os.environ["SLNG_PROJECT_ID"],
     model="slng/deepgram/nova:3-en",
 )
 tts = SlngTTSService(
     api_key=os.getenv("SLNG_API_KEY"),
+    project_id=os.environ["SLNG_PROJECT_ID"],
     model="cartesia/sonic:3",
     voice="9626c31c-bec5-4cca-baa8-f8ba9e84c8bc",  # same Cartesia voice id as before
 )
@@ -240,6 +247,7 @@ llm = OpenAILLMService(
     default_headers={
         "X-Slng-Agent-Id": agent_id,
         "X-Slng-Session-Id": session_id,
+        "X-SLNG-Project-Id": os.environ["SLNG_PROJECT_ID"],
     },
     settings=OpenAILLMService.Settings(model="slng/auto"),
 )

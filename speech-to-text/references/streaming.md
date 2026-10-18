@@ -6,7 +6,7 @@ WebSocket URL: `wss://api.slng.ai/v1/stt/{provider}/{model}:{variant}`
 
 ## Protocol
 
-1. Connect with `Authorization: Bearer <key>` header.
+1. Connect with the `Authorization: Bearer <key>` and `X-SLNG-Project-Id: <project id>` headers.
 2. Send an init JSON frame:
 
    ```json
@@ -50,8 +50,11 @@ import asyncio, json, os, websockets
 URL = "wss://api.slng.ai/v1/stt/slng/deepgram/nova:3-en"
 
 async def transcribe(path: str):
-    headers = {"Authorization": f"Bearer {os.environ['VOICEAI_API_KEY']}"}
-    async with websockets.connect(URL, extra_headers=headers) as ws:
+    headers = {
+        "Authorization": f"Bearer {os.environ['VOICEAI_API_KEY']}",
+        "X-SLNG-Project-Id": os.environ["SLNG_PROJECT_ID"],
+    }
+    async with websockets.connect(URL, additional_headers=headers) as ws:
         await ws.send(json.dumps({
             "type": "init",
             "config": {"language": "en", "sample_rate": 16000, "encoding": "linear16"},
@@ -83,19 +86,7 @@ async def transcribe(path: str):
 asyncio.run(transcribe("audio.raw"))
 ```
 
-With the SDK:
-
-```python
-from voiceai import VoiceAI
-
-client = VoiceAI()
-async with client.stt.stream(model="slng/deepgram/nova:3-en", encoding="linear16", sample_rate=16000) as session:
-    async for chunk in iter_mic():
-        await session.send(chunk)
-    async for event in session.events():
-        if event.type == "final_transcript":
-            print(event.transcript)
-```
+The Python SDK has no WebSocket client yet. Use the `websockets` example above.
 
 ## TypeScript
 
@@ -105,7 +96,10 @@ import { readFileSync } from "fs";
 
 const URL = "wss://api.slng.ai/v1/stt/slng/deepgram/nova:3-en";
 const ws = new WebSocket(URL, {
-  headers: { Authorization: `Bearer ${process.env.VOICEAI_API_KEY}` },
+  headers: {
+    Authorization: `Bearer ${process.env.VOICEAI_API_KEY}`,
+    "X-SLNG-Project-Id": process.env.SLNG_PROJECT_ID!,
+  },
 });
 
 ws.on("open", () => {
@@ -130,25 +124,32 @@ ws.on("message", (raw) => {
 With the SDK:
 
 ```typescript
-import { VoiceAI } from "voiceai-sdk";
+import { StreamingClient } from "voiceai-sdk/streaming";
 
-const client = new VoiceAI();
-const session = await client.stt.stream({
-  model: "slng/deepgram/nova:3-en",
-  encoding: "linear16",
-  sampleRate: 16000,
+// Uses the Unmute bridge (/v1/bridges/unmute/stt/...). projectId is sent as X-SLNG-Project-Id.
+const streaming = new StreamingClient({
+  apiKey: process.env.VOICEAI_API_KEY!,
+  projectId: process.env.SLNG_PROJECT_ID,
 });
+const session = await streaming.connectStt("slng/deepgram/nova:3-en");
+session.send({ type: "init", config: { language: "en", sample_rate: 16000, encoding: "linear16" } });
 
-session.on("final_transcript", (e) => console.log(e.transcript));
-for await (const chunk of mic()) session.send(chunk);
-await session.close();
+(async () => {
+  for await (const chunk of mic()) session.sendAudio(chunk);
+  session.send({ type: "close" });
+})();
+
+for await (const msg of session) {
+  if (msg.type === "final_transcript" && "transcript" in msg) console.log(msg.transcript);
+}
 ```
 
 ## wscat
 
 ```bash
 npx wscat -c wss://api.slng.ai/v1/stt/slng/deepgram/nova:3-en \
-  -H "Authorization: Bearer $VOICEAI_API_KEY"
+  -H "Authorization: Bearer $VOICEAI_API_KEY" \
+  -H "X-SLNG-Project-Id: $SLNG_PROJECT_ID"
 
 # then paste:
 {"type":"init","config":{"language":"en","sample_rate":16000,"encoding":"linear16"}}

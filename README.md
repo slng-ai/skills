@@ -33,16 +33,16 @@ npx skills add slng-ai/skills text-to-speech # install one skill
 
 ```bash
 cp .env.example .env
-# edit .env and add your VOICEAI_API_KEY
+# edit .env and add your VOICEAI_API_KEY and SLNG_PROJECT_ID
 ```
 
-Get a key from the [SLNG dashboard](https://app.slng.ai/api-keys). See the [`setup-api-key`](./setup-api-key) skill for the full flow.
+Get a key from the [SLNG dashboard](https://app.slng.ai/api-keys), and the project id from the project's Settings page. Every TTS and STT request sends it in the `X-SLNG-Project-Id` header. See the [`setup-api-key`](./setup-api-key) skill for the full flow.
 
 ## Skills
 
 | Skill | Purpose |
 |-------|---------|
-| [`setup-api-key`](./setup-api-key) | Configure and validate `VOICEAI_API_KEY` |
+| [`setup-api-key`](./setup-api-key) | Configure and validate `VOICEAI_API_KEY` and `SLNG_PROJECT_ID` |
 | [`text-to-speech`](./text-to-speech) | Generate speech from text (Deepgram Aura, Rime Arcana, Cartesia, etc.) |
 | [`speech-to-text`](./speech-to-text) | Transcribe audio (Deepgram Nova, Sarvam Saaras, Soniox, Reson8) |
 | [`agent-prompt`](./agent-prompt) | Build a complete voice agent prompt ready to paste into the SLNG Agent Builder |

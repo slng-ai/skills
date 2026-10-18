@@ -80,6 +80,17 @@ Check presence without printing the value:
 [ -n "$SLNG_API_KEY" ] && echo "SLNG_API_KEY is set" || echo "SLNG_API_KEY is NOT set"
 ```
 
+SLNG API keys belong to the organization, so every selected stage also sends the project id in the
+`X-SLNG-Project-Id` header. It picks the project the traffic is billed and limited under. Store the
+project UUID in `SLNG_PROJECT_ID`. It is on the project's Settings page in the
+[SLNG dashboard](https://app.slng.ai) (see the `setup-api-key` skill). A key created for one project
+uses that project when the header is missing, but requests without it will be rejected after the
+cutoff.
+
+```bash
+[ -n "$SLNG_PROJECT_ID" ] && echo "SLNG_PROJECT_ID is set" || echo "SLNG_PROJECT_ID is NOT set"
+```
+
 Store secrets using the project's existing env convention and confirm local secret files are ignored
 by git before writing to them.
 
@@ -116,7 +127,8 @@ Default to a faithful migration:
   when possible.
 - LLM: preserve the existing LLM unless SLNG LLM was selected; then point an OpenAI-compatible client
   at the selected regional SLNG router with `model="slng/auto"` and required
-  `X-Slng-Agent-Id` / `X-Slng-Session-Id` headers from stable project identifiers.
+  `X-Slng-Agent-Id` / `X-Slng-Session-Id` headers from stable project identifiers, plus
+  `X-SLNG-Project-Id` from `SLNG_PROJECT_ID`.
 - Add one small adapter module only when it makes the diff easier to review.
 - If a selected model or mode is unsupported, migrate the stages that work and leave the failing stage
   unchanged. Report the partial migration clearly.
@@ -127,12 +139,15 @@ Use `voiceai-sdk` at the existing provider seam or in one new adapter module. Do
 framework or rename project concepts.
 
 Use `os.environ["SLNG_API_KEY"]` in Python and `process.env.SLNG_API_KEY` in server-side JavaScript.
+Send `SLNG_PROJECT_ID` as the `X-SLNG-Project-Id` header on every SLNG client (`default_headers` /
+`defaultHeaders`, or `project_id` / `projectId` on `StreamingClient`).
 For browser code, do not expose the key; route through an existing backend or stop and report that a
 server-side boundary is required.
 
 For Context Router, use `slng/auto` as the only code-level model. Do not place provider/catalog model ids
 in customer code; those belong in SLNG org configuration. Add `X-Slng-Agent-Id` and
-`X-Slng-Session-Id` as headers using stable app identifiers. Do not generate random IDs per request.
+`X-Slng-Session-Id` as headers using stable app identifiers, plus `X-SLNG-Project-Id` from
+`SLNG_PROJECT_ID`. Do not generate random IDs per request.
 
 Before inserting anything, check whether the project already has:
 

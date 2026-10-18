@@ -2,14 +2,14 @@
 name: text-to-speech
 description: Convert text to speech using the slng.ai Voice AI API. Use when generating audio from text, creating voiceovers, synthesizing speech, building voice apps, or working with Deepgram Aura, Rime Arcana, Cartesia Sonic, Sarvam Bulbul, Kugel, Murf Falcon, or Soniox TTS via slng.
 license: MIT
-compatibility: Requires internet access and a slng.ai API key (VOICEAI_API_KEY).
+compatibility: Requires internet access, a slng.ai API key (VOICEAI_API_KEY) and a project id (SLNG_PROJECT_ID).
 ---
 
 # slng Text-to-Speech
 
 Generate speech from text using slng's unified Voice AI API. One endpoint reaches every provider (Deepgram, Rime, Cartesia, Sarvam, Kugel, Murf, Soniox) with HTTP one-shot or WebSocket streaming.
 
-> **Setup:** [`setup-api-key`](../setup-api-key/SKILL.md) configures `VOICEAI_API_KEY`. Installation details for each path are in [`references/installation.md`](references/installation.md).
+> **Setup:** [`setup-api-key`](../setup-api-key/SKILL.md) configures `VOICEAI_API_KEY` and `SLNG_PROJECT_ID`. Every request sends the project id in the `X-SLNG-Project-Id` header (the CLI reads `SLNG_PROJECT_ID` or `--project <id>`). Installation details for each path are in [`references/installation.md`](references/installation.md).
 
 ## Quick Start
 
@@ -30,7 +30,10 @@ import os, requests
 
 r = requests.post(
     "https://api.slng.ai/v1/tts/slng/deepgram/aura:2",
-    headers={"Authorization": f"Bearer {os.environ['VOICEAI_API_KEY']}"},
+    headers={
+        "Authorization": f"Bearer {os.environ['VOICEAI_API_KEY']}",
+        "X-SLNG-Project-Id": os.environ["SLNG_PROJECT_ID"],
+    },
     json={
         "text": "The package you ordered is out for delivery today.",
         "model": "aura-2-luna-en",
@@ -47,6 +50,7 @@ const r = await fetch("https://api.slng.ai/v1/tts/slng/deepgram/aura:2", {
   method: "POST",
   headers: {
     Authorization: `Bearer ${process.env.VOICEAI_API_KEY}`,
+    "X-SLNG-Project-Id": process.env.SLNG_PROJECT_ID!,
     "Content-Type": "application/json",
   },
   body: JSON.stringify({
@@ -62,6 +66,7 @@ await Bun.write("welcome.wav", await r.arrayBuffer());
 ```bash
 curl https://api.slng.ai/v1/tts/slng/deepgram/aura:2 \
   -H "Authorization: Bearer $VOICEAI_API_KEY" \
+  -H "X-SLNG-Project-Id: $SLNG_PROJECT_ID" \
   -H "Content-Type: application/json" \
   -d '{"text":"Reminder: your appointment is at three pm.","model":"aura-2-asteria-en"}' \
   --output reminder.wav
@@ -135,6 +140,8 @@ Available regions: `ap-south-1`, `ap-southeast-2`, `asia-south1`, `asia-southeas
 |--------|---------|-----|
 | `401` | Missing or invalid API key | Check `VOICEAI_API_KEY` |
 | `400` | Invalid request — usually bad `model` (voice id) | The error body lists valid options |
+| `400` | `X-SLNG-Project-Id header is required` or `Invalid X-SLNG-Project-Id header` | Send the project UUID from `SLNG_PROJECT_ID` in `X-SLNG-Project-Id` |
+| `403` | `project not found or not available in this region` | Use a project of the key's organization that is available in the region you call |
 | `404` | Endpoint path wrong | Check `provider/model:variant` casing |
 | `429` | Rate limit | Back off and retry |
 | `500` | Upstream provider error | Often a malformed `model` value passed through |
